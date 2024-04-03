@@ -195,4 +195,6 @@ interface IStabilityPool {
      * Only callable by Active Pool, it just accounts for ETH received
      * receive() external payable;
      */
+
+    function addETH(uint amount) external;
 }

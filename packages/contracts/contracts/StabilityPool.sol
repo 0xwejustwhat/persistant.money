@@ -844,8 +844,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit StabilityPoolETHBalanceUpdated(newETH);
         emit EtherSent(msg.sender, _amount);
 
-        (bool success, ) = msg.sender.call{ value: _amount }("");
-        require(success, "StabilityPool: sending ETH failed");
+        IERC20(stETHAddress).transfer(msg.sender, _amount);
     }
 
     // Send LUSD to user and decrease LUSD in Pool
@@ -999,9 +998,9 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // --- Fallback function ---
 
     // To Change
-    receive() external payable {
+    function addETH(uint amount) external override {
         _requireCallerIsActivePool();
-        ETH = ETH.add(msg.value);
+        ETH = ETH.add(amount);
         StabilityPoolETHBalanceUpdated(ETH);
     }
 }

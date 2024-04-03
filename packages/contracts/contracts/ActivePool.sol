@@ -5,6 +5,7 @@ pragma solidity 0.6.11;
 import './Interfaces/IActivePool.sol';
 import './Interfaces/ICollSurplusPool.sol';
 import './Interfaces/IDefaultPool.sol';
+import './Interfaces/IStabilityPool.sol';
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
@@ -104,6 +105,8 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
             ICollSurplusPool(_account).addETH(_amount);
         } else if (_account == defaultPoolAddress) {
             IDefaultPool(_account).addETH(_amount);
+        } else if (_account == stabilityPoolAddress) {
+            IStabilityPool(_account).addETH(_amount);
         }
     }
 
