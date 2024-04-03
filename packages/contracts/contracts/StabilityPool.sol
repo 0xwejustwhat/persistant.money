@@ -829,6 +829,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit StabilityPoolLUSDBalanceUpdated(newTotalLUSDDeposits);
     }
 
+    // To Change
     function _sendETHGainToDepositor(uint _amount) internal {
         if (_amount == 0) {return;}
         uint newETH = ETH.sub(_amount);
@@ -990,6 +991,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     // --- Fallback function ---
 
+    // To Change
     receive() external payable {
         _requireCallerIsActivePool();
         ETH = ETH.add(msg.value);

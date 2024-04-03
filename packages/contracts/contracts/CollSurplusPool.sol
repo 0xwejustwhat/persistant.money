@@ -79,6 +79,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         emit CollBalanceUpdated(_account, newAmount);
     }
 
+    // To Change
     function claimColl(address _account) external override {
         _requireCallerIsBorrowerOperations();
         uint claimableColl = balances[_account];
@@ -116,6 +117,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
 
     // --- Fallback function ---
 
+    // To Change
     receive() external payable {
         _requireCallerIsActivePool();
         ETH = ETH.add(msg.value);

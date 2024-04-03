@@ -67,6 +67,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     // --- Pool functionality ---
 
+    // To Change
     function sendETHToActivePool(uint _amount) external override {
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
@@ -102,6 +103,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     // --- Fallback function ---
 
+    // To Change
     receive() external payable {
         _requireCallerIsActivePool();
         ETH = ETH.add(msg.value);

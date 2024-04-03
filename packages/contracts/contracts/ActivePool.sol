@@ -80,6 +80,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     // --- Pool functionality ---
 
+    // To Change
     function sendETH(address _account, uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
         ETH = ETH.sub(_amount);
@@ -128,6 +129,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     // --- Fallback function ---
 
+    // To Change
     receive() external payable {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
         ETH = ETH.add(msg.value);
