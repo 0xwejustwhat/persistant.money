@@ -3,6 +3,7 @@
 pragma solidity 0.6.11;
 
 import './Interfaces/IActivePool.sol';
+import './Interfaces/ICollSurplusPool.sol';
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
@@ -26,6 +27,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     address public stabilityPoolAddress;
     address public defaultPoolAddress;
     address public stETHAddress;
+    address public collSurplusPoolAddress;
     uint256 internal ETH;  // deposited ether tracker
     uint256 internal LUSDDebt;
 
@@ -43,7 +45,8 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         address _troveManagerAddress,
         address _stabilityPoolAddress,
         address _defaultPoolAddress,
-        address _stETHAddress
+        address _stETHAddress,
+        address _collSurplusPoolAddress
     )
         external
         onlyOwner
@@ -53,12 +56,14 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         checkContract(_stabilityPoolAddress);
         checkContract(_defaultPoolAddress);
         checkContract(_stETHAddress);
+        checkContract(_collSurplusPoolAddress);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
         defaultPoolAddress = _defaultPoolAddress;
         stETHAddress = _stETHAddress;
+        collSurplusPoolAddress = _collSurplusPoolAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -93,6 +98,10 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         emit EtherSent(_account, _amount);
 
         IERC20(stETHAddress).transfer(_account, _amount);
+
+        if (_account == collSurplusPoolAddress) {
+            ICollSurplusPool(_account).addETH(_amount);
+        }
     }
 
     function increaseLUSDDebt(uint _amount) external override {

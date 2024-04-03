@@ -7,6 +7,7 @@ import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/IERC20.sol";
 
 
 contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
@@ -17,6 +18,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     address public borrowerOperationsAddress;
     address public troveManagerAddress;
     address public activePoolAddress;
+    address public stETHAddress;
 
     // deposited ether tracker
     uint256 internal ETH;
@@ -37,7 +39,8 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     function setAddresses(
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
-        address _activePoolAddress
+        address _activePoolAddress, 
+        address _stETHAddress
     )
         external
         override
@@ -46,10 +49,12 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
+        checkContract(_stETHAddress);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
+        stETHAddress = _stETHAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -91,8 +96,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         ETH = ETH.sub(claimableColl);
         emit EtherSent(_account, claimableColl);
 
-        (bool success, ) = _account.call{ value: claimableColl }("");
-        require(success, "CollSurplusPool: sending ETH failed");
+        IERC20(stETHAddress).transfer(_account, claimableColl);
     }
 
     // --- 'require' functions ---
@@ -118,8 +122,8 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     // --- Fallback function ---
 
     // To Change
-    receive() external payable {
+    function addETH(uint amount) external override {
         _requireCallerIsActivePool();
-        ETH = ETH.add(msg.value);
+        ETH = ETH.add(amount);
     }
 }

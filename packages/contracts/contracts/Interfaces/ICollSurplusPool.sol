@@ -19,7 +19,8 @@ interface ICollSurplusPool {
     function setAddresses(
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
-        address _activePoolAddress
+        address _activePoolAddress,
+        address _stETHAddress
     ) external;
 
     function getETH() external view returns (uint);
@@ -29,4 +30,6 @@ interface ICollSurplusPool {
     function accountSurplus(address _account, uint _amount) external;
 
     function claimColl(address _account) external;
+
+    function addETH(uint amount) external;
 }

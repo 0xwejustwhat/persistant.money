@@ -81,7 +81,8 @@ interface IStabilityPool {
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
         address _priceFeedAddress,
-        address _communityIssuanceAddress
+        address _communityIssuanceAddress,
+        address _stETHAddress
     ) external;
 
     /*

@@ -15,6 +15,7 @@ import "./Dependencies/LiquitySafeMath128.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/IERC20.sol";
 
 /*
  * The Stability Pool holds LUSD tokens deposited by Stability Pool depositors.
@@ -150,6 +151,8 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     string constant public NAME = "StabilityPool";
 
+    address stETHAddress;
+
     IBorrowerOperations public borrowerOperations;
 
     ITroveManager public troveManager;
@@ -276,7 +279,8 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
         address _priceFeedAddress,
-        address _communityIssuanceAddress
+        address _communityIssuanceAddress, 
+        address _stETHAddress
     )
         external
         override
@@ -289,6 +293,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         checkContract(_sortedTrovesAddress);
         checkContract(_priceFeedAddress);
         checkContract(_communityIssuanceAddress);
+        checkContract(_stETHAddress);
 
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -297,6 +302,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         priceFeed = IPriceFeed(_priceFeedAddress);
         communityIssuance = ICommunityIssuance(_communityIssuanceAddress);
+        stETHAddress = _stETHAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -457,7 +463,8 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit StabilityPoolETHBalanceUpdated(ETH);
         emit EtherSent(msg.sender, depositorETHGain);
 
-        borrowerOperations.moveETHGainToTrove{ value: depositorETHGain }(msg.sender, _upperHint, _lowerHint);
+        IERC20(stETHAddress).transfer(address(borrowerOperations), depositorETHGain);
+        borrowerOperations.moveETHGainToTrove(msg.sender, _upperHint, _lowerHint, depositorETHGain);
     }
 
     // --- LQTY issuance functions ---
