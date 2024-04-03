@@ -3,10 +3,12 @@
 pragma solidity 0.6.11;
 
 import './Interfaces/IDefaultPool.sol';
+import './Interfaces/IActivePool.sol';
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/IERC20.sol";
 
 /*
  * The Default Pool holds the ETH and LUSD debt (but not LUSD tokens) from liquidations that have been redistributed
@@ -22,6 +24,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     address public troveManagerAddress;
     address public activePoolAddress;
+    address public stETHAddress;
     uint256 internal ETH;  // deposited ETH tracker
     uint256 internal LUSDDebt;  // debt
 
@@ -33,16 +36,19 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     function setAddresses(
         address _troveManagerAddress,
-        address _activePoolAddress
+        address _activePoolAddress,
+        address _stETHAddress
     )
         external
         onlyOwner
     {
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
+        checkContract(_stETHAddress);
 
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
+        stETHAddress = _stETHAddress;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -75,8 +81,8 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         emit DefaultPoolETHBalanceUpdated(ETH);
         emit EtherSent(activePool, _amount);
 
-        (bool success, ) = activePool.call{ value: _amount }("");
-        require(success, "DefaultPool: sending ETH failed");
+        IERC20(stETHAddress).transfer(activePool, _amount);
+        IActivePool(activePool).addETH(_amount);
     }
 
     function increaseLUSDDebt(uint _amount) external override {
@@ -104,9 +110,9 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     // --- Fallback function ---
 
     // To Change
-    receive() external payable {
+    function addETH(uint amount) external override{
         _requireCallerIsActivePool();
-        ETH = ETH.add(msg.value);
+        ETH = ETH.add(amount);
         emit DefaultPoolETHBalanceUpdated(ETH);
     }
 }
