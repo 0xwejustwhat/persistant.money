@@ -24,6 +24,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     address public troveManagerAddress;
     address public stabilityPoolAddress;
     address public defaultPoolAddress;
+    address public stETH;
     uint256 internal ETH;  // deposited ether tracker
     uint256 internal LUSDDebt;
 
@@ -130,9 +131,9 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     // --- Fallback function ---
 
     // To Change
-    receive() external payable {
+    function addETH(uint amount) external override {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
-        ETH = ETH.add(msg.value);
+        ETH = ETH.add(amount);
         emit ActivePoolETHBalanceUpdated(ETH);
     }
 }
