@@ -19,6 +19,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     // --- Connected contract declarations ---
 
+    address stETHAddress;
+
     ITroveManager public troveManager;
 
     address stabilityPoolAddress;
@@ -106,7 +108,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         address _priceFeedAddress,
         address _sortedTrovesAddress,
         address _lusdTokenAddress,
-        address _lqtyStakingAddress
+        address _lqtyStakingAddress,
+        address _stETHAddress
     )
         external
         override
@@ -125,6 +128,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         checkContract(_sortedTrovesAddress);
         checkContract(_lusdTokenAddress);
         checkContract(_lqtyStakingAddress);
+        checkContract(_stETHAddress);
 
         troveManager = ITroveManager(_troveManagerAddress);
         activePool = IActivePool(_activePoolAddress);
@@ -137,6 +141,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         lusdToken = ILUSDToken(_lusdTokenAddress);
         lqtyStakingAddress = _lqtyStakingAddress;
         lqtyStaking = ILQTYStaking(_lqtyStakingAddress);
+        stETHAddress = _stETHAddress;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -157,7 +162,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     // To Change
     function openTrove(uint _maxFeePercentage, uint _LUSDAmount, address _upperHint, address _lowerHint, uint amount) external override {
 
-        IERC20(0x0).transferFrom(msg.sender, address(this), amount);
+        IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
 
         ContractsCache memory contractsCache = ContractsCache(troveManager, activePool, lusdToken);
         LocalVariables_openTrove memory vars;
@@ -216,14 +221,14 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     // Send ETH as collateral to a trove
     function addColl(address _upperHint, address _lowerHint, uint amount) external override {
-        IERC20(0x0).transferFrom(msg.sender, address(this), amount);
+        IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
         _adjustTrove(msg.sender, 0, 0, false, _upperHint, _lowerHint, 0, amount);
     }
 
     // Send ETH as collateral to a trove. Called by only the Stability Pool.
     function moveETHGainToTrove(address _borrower, address _upperHint, address _lowerHint, uint amount) external override {
         _requireCallerIsStabilityPool();
-        IERC20(0x0).transferFrom(msg.sender, address(this), amount);
+        IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
         _adjustTrove(_borrower, 0, 0, false, _upperHint, _lowerHint, 0, amount);
     }
 
@@ -244,7 +249,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     function adjustTrove(uint _maxFeePercentage, uint _collWithdrawal, uint _LUSDChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint amount) external override {
         if (amount != 0) {
-            IERC20(0x0).transferFrom(msg.sender, address(this), amount);
+            IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
         }
         _adjustTrove(msg.sender, _collWithdrawal, _LUSDChange, _isDebtIncrease, _upperHint, _lowerHint, _maxFeePercentage, amount);
     }
