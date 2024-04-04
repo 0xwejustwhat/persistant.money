@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.11;
 
-interface Token {
+interface IToken {
 
     /// @param _owner The address from which the balance will be retrieved
     /// @return balance the balance
@@ -36,7 +36,7 @@ interface Token {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }
 
-contract ERC20 is Token {
+contract Token is IToken {
     uint256 constant private MAX_UINT256 = 2**256 - 1;
     mapping (address => uint256) public balances;
     mapping (address => mapping (address => uint256)) public allowed;

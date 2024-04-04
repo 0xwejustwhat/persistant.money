@@ -13,7 +13,7 @@ import "../LUSDToken.sol";
 import "./PriceFeedTestnet.sol";
 import "../SortedTroves.sol";
 import "./EchidnaProxy.sol";
-import "../ERC20.sol";
+import "../Token.sol";
 //import "../Dependencies/console.sol";
 
 // Run with:
@@ -39,7 +39,7 @@ contract EchidnaTester {
     LUSDToken public lusdToken;
     PriceFeedTestnet priceFeedTestnet;
     SortedTroves sortedTroves;
-    ERC20 stETH;
+    Token stETH;
 
     EchidnaProxy[NUMBER_OF_ACTORS] public echidnaProxies;
 
@@ -58,7 +58,7 @@ contract EchidnaTester {
             address(stabilityPool),
             address(borrowerOperations)
         );
-        stETH = new ERC20(INITIAL_BALANCE, "stETH", 18, "stETH");
+        stETH = new Token(INITIAL_BALANCE, "stETH", 18, "stETH");
 
         collSurplusPool = new CollSurplusPool();
         priceFeedTestnet = new PriceFeedTestnet();
