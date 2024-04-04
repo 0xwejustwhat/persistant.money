@@ -6,27 +6,27 @@ import "../TroveManager.sol";
 import "../BorrowerOperations.sol";
 import "../StabilityPool.sol";
 import "../LUSDToken.sol";
+import "../Dependencies/IERC20.sol";
 
 contract EchidnaProxy {
     TroveManager troveManager;
     BorrowerOperations borrowerOperations;
     StabilityPool stabilityPool;
     LUSDToken lusdToken;
+    address stETHAddress;
 
     constructor(
         TroveManager _troveManager,
         BorrowerOperations _borrowerOperations,
         StabilityPool _stabilityPool,
-        LUSDToken _lusdToken
+        LUSDToken _lusdToken,
+        address _stETHAddress
     ) public {
         troveManager = _troveManager;
         borrowerOperations = _borrowerOperations;
         stabilityPool = _stabilityPool;
         lusdToken = _lusdToken;
-    }
-
-    receive() external payable {
-        // do nothing
+        stETHAddress = _stETHAddress;
     }
 
     // TroveManager
@@ -56,12 +56,14 @@ contract EchidnaProxy {
     }
 
     // Borrower Operations
-    function openTrovePrx(uint _ETH, uint _LUSDAmount, address _upperHint, address _lowerHint, uint _maxFee) external payable {
-        borrowerOperations.openTrove{value: _ETH}(_maxFee, _LUSDAmount, _upperHint, _lowerHint);
+    // Was payable
+    function openTrovePrx(uint _ETH, uint _LUSDAmount, address _upperHint, address _lowerHint, uint _maxFee) external {
+        borrowerOperations.openTrove(_maxFee, _LUSDAmount, _upperHint, _lowerHint, _ETH);
     }
 
-    function addCollPrx(uint _ETH, address _upperHint, address _lowerHint) external payable {
-        borrowerOperations.addColl{value: _ETH}(_upperHint, _lowerHint);
+    // Was payable
+    function addCollPrx(uint _ETH, address _upperHint, address _lowerHint) external {
+        borrowerOperations.addColl(_upperHint, _lowerHint, _ETH);
     }
 
     function withdrawCollPrx(uint _amount, address _upperHint, address _lowerHint) external {
@@ -81,7 +83,7 @@ contract EchidnaProxy {
     }
 
     function adjustTrovePrx(uint _ETH, uint _collWithdrawal, uint _debtChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint _maxFee) external payable {
-        borrowerOperations.adjustTrove{value: _ETH}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, _upperHint, _lowerHint);
+        borrowerOperations.adjustTrove(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, _upperHint, _lowerHint, _ETH);
     }
 
     // Pool Manager

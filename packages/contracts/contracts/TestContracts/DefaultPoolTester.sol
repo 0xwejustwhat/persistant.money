@@ -3,6 +3,7 @@
 pragma solidity 0.6.11;
 
 import "../DefaultPool.sol";
+import "../Dependencies/IERC20.sol";
 
 contract DefaultPoolTester is DefaultPool {
     
@@ -10,7 +11,8 @@ contract DefaultPoolTester is DefaultPool {
         LUSDDebt  = LUSDDebt.add(_amount);
     }
 
-    function unprotectedPayable() external payable {
-        ETH = ETH.add(msg.value);
+    function unprotectedPayable(uint amount) external {
+        IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
+        ETH = ETH.add(amount);
     }
 }
