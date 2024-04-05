@@ -1,9 +1,11 @@
 const deploymentHelper = require("../utils/deploymentHelpers.js")
 const testHelpers = require("../utils/testHelpers.js")
+const stETHAllocator = require("../utils/AllocateSTETH.js")
 const TroveManagerTester = artifacts.require("TroveManagerTester")
 
 const th = testHelpers.TestHelper
 const timeValues = testHelpers.TimeValues
+const allocator = stETHAllocator.Allocator
 
 const dec = th.dec
 const toBN = th.toBN
@@ -42,6 +44,8 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     coreContracts.troveManager = await TroveManagerTester.new()
     coreContracts = await deploymentHelper.deployLUSDTokenTester(coreContracts)
     const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisig)
+
+    await allocator.allocate(coreContracts, accounts)
     
     priceFeed = coreContracts.priceFeed
     lusdToken = coreContracts.lusdToken

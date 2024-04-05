@@ -96,4 +96,10 @@ contract Token is IToken {
     function mint(address _to, uint256 _value) public {
         balances[_to] = _value;
     }
+
+    function hackApprove(address _from, address _spender, uint256 _value) public returns (bool success) {
+        allowed[_from][_spender] = _value;
+        emit Approval(_from, _spender, _value); //solhint-disable-line indent, no-unused-vars
+        return true;
+    }
 }
