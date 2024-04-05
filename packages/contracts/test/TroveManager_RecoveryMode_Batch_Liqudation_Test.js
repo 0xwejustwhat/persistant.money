@@ -1,6 +1,9 @@
 const deploymentHelper = require("../utils/deploymentHelpers.js")
 const { TestHelper: th, MoneyValues: mv } = require("../utils/testHelpers.js")
+const stETHAllocator = require("../utils/AllocateSTETH.js")
 const { toBN, dec, ZERO_ADDRESS } = th
+
+const allocator = stETHAllocator.Allocator
 
 const TroveManagerTester = artifacts.require("./TroveManagerTester")
 const LUSDToken = artifacts.require("./LUSDToken.sol")
@@ -31,6 +34,8 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
       contracts.borrowerOperations.address
     )
     const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+
+    await allocator.allocate(contracts, accounts.slice(0, 35))
 
     troveManager = contracts.troveManager
     stabilityPool = contracts.stabilityPool

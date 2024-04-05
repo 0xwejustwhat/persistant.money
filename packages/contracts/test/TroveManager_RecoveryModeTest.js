@@ -1,7 +1,9 @@
 const deploymentHelper = require("../utils/deploymentHelpers.js")
 const testHelpers = require("../utils/testHelpers.js")
+const stETHAllocator = require("../utils/AllocateSTETH.js")
 
 const th = testHelpers.TestHelper
+const allocator = stETHAllocator.Allocator
 const dec = th.dec
 const toBN = th.toBN
 const assertRevert = th.assertRevert
@@ -63,6 +65,8 @@ contract('TroveManager - in Recovery Mode', async accounts => {
       contracts.borrowerOperations.address
     )
     const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+
+    await allocator.allocate(contracts, accounts.slice(0, 35))
 
     priceFeed = contracts.priceFeedTestnet
     lusdToken = contracts.lusdToken
