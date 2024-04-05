@@ -38,6 +38,7 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
     address public troveManagerAddress;
     address public borrowerOperationsAddress;
     address public activePoolAddress;
+    address public stETHAddress;
 
     // --- Events ---
 
@@ -63,7 +64,8 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
         address _lusdTokenAddress,
         address _troveManagerAddress, 
         address _borrowerOperationsAddress,
-        address _activePoolAddress
+        address _activePoolAddress,
+        address _stETHAddress
     ) 
         external 
         onlyOwner 
@@ -74,12 +76,14 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
         checkContract(_troveManagerAddress);
         checkContract(_borrowerOperationsAddress);
         checkContract(_activePoolAddress);
+        checkContract(_stETHAddress);
 
         lqtyToken = ILQTYToken(_lqtyTokenAddress);
         lusdToken = ILUSDToken(_lusdTokenAddress);
         troveManagerAddress = _troveManagerAddress;
         borrowerOperationsAddress = _borrowerOperationsAddress;
         activePoolAddress = _activePoolAddress;
+        stETHAddress = _stETHAddress;
 
         emit LQTYTokenAddressSet(_lqtyTokenAddress);
         emit LQTYTokenAddressSet(_lusdTokenAddress);
@@ -215,8 +219,7 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
 
     function _sendETHGainToUser(uint ETHGain) internal {
         emit EtherSent(msg.sender, ETHGain);
-        (bool success, ) = msg.sender.call{value: ETHGain}("");
-        require(success, "LQTYStaking: Failed to send accumulated ETHGain");
+        IERC20(stETHAddress).transfer(msg.sender, ETHGain);
     }
 
     // --- 'require' functions ---
