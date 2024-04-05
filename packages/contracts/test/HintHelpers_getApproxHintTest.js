@@ -1,7 +1,9 @@
 const deploymentHelper = require("../utils/deploymentHelpers.js")
 const testHelpers = require("../utils/testHelpers.js")
+const stETHAllocator = require("../utils/AllocateSTETH.js")
 
 const th = testHelpers.TestHelper
+const allocator = stETHAllocator.Allocator
 const { dec, toBN } = th
 const moneyVals = testHelpers.MoneyValues
 
@@ -47,7 +49,7 @@ contract('HintHelpers', async accounts => {
  const openTrove = async (account, index) => {
    const amountFinney = 2000 + index * 10
    const coll = web3.utils.toWei((amountFinney.toString()), 'finney')
-   await borrowerOperations.openTrove(th._100pct, 0, account, account, { from: account, value: coll })
+   await borrowerOperations.openTrove(th._100pct, 0, account, account, coll, { from: account })
  }
 
  const withdrawLUSDfromTrove = async (account) => {
@@ -92,6 +94,8 @@ contract('HintHelpers', async accounts => {
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 
     numAccounts = 10
+
+    await allocator.allocate(contracts, accounts.slice(0, numAccounts))
 
     await priceFeed.setPrice(dec(100, 18))
     await makeTrovesInSequence(accounts, numAccounts) 
