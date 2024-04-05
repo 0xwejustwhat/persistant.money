@@ -80,7 +80,7 @@ contract('BorrowerOperations', async accounts => {
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 
-      await allocator.allocate(contracts, accounts)
+      await allocator.allocate(contracts, accounts.slice(0, 11))
 
       if (withProxy) {
         const users = [alice, bob, carol, dennis, whale, A, B, C, D, E]
@@ -553,13 +553,13 @@ contract('BorrowerOperations', async accounts => {
 
       // check before
       const activePool_ETH_before = await activePool.getETH()
-      const activePool_RawEther_before = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_before = toBN(await contracts.stETH.balanceOf(activePool.address))
 
       await borrowerOperations.withdrawColl(dec(1, 'ether'), alice, alice, { from: alice })
 
       // check after
       const activePool_ETH_After = await activePool.getETH()
-      const activePool_RawEther_After = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_After = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_After.eq(activePool_ETH_before.sub(toBN(dec(1, 'ether')))))
       assert.isTrue(activePool_RawEther_After.eq(activePool_RawEther_before.sub(toBN(dec(1, 'ether')))))
     })
@@ -592,10 +592,10 @@ contract('BorrowerOperations', async accounts => {
     it("withdrawColl(): sends the correct amount of ETH to the user", async () => {
       await openTrove({ ICR: toBN(dec(2, 18)), extraParams: { from: alice, value: dec(2, 'ether') } })
 
-      const alice_ETHBalance_Before = toBN(web3.utils.toBN(await web3.eth.getBalance(alice)))
+      const alice_ETHBalance_Before = toBN(web3.utils.toBN(await contracts.stETH.balanceOf(alice)))
       await borrowerOperations.withdrawColl(dec(1, 'ether'), alice, alice, { from: alice, gasPrice: 0 })
 
-      const alice_ETHBalance_After = toBN(web3.utils.toBN(await web3.eth.getBalance(alice)))
+      const alice_ETHBalance_After = toBN(web3.utils.toBN(await contracts.stETH.balanceOf(alice)))
       const balanceDiff = alice_ETHBalance_After.sub(alice_ETHBalance_Before)
 
       assert.isTrue(balanceDiff.eq(toBN(dec(1, 'ether'))))
@@ -2463,7 +2463,7 @@ contract('BorrowerOperations', async accounts => {
       await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: alice } })
 
       const activePool_ETH_Before = await activePool.getETH()
-      const activePool_RawEther_Before = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_Before = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_Before.gt(toBN('0')))
       assert.isTrue(activePool_RawEther_Before.gt(toBN('0')))
 
@@ -2471,7 +2471,7 @@ contract('BorrowerOperations', async accounts => {
       await borrowerOperations.adjustTrove(th._100pct, dec(100, 'finney'), dec(10, 18), false, alice, alice, 0, { from: alice })
 
       const activePool_ETH_After = await activePool.getETH()
-      const activePool_RawEther_After = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_After = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_After.eq(activePool_ETH_Before.sub(toBN(dec(1, 17)))))
       assert.isTrue(activePool_RawEther_After.eq(activePool_ETH_Before.sub(toBN(dec(1, 17)))))
     })
@@ -2482,7 +2482,7 @@ contract('BorrowerOperations', async accounts => {
       await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: alice } })
 
       const activePool_ETH_Before = await activePool.getETH()
-      const activePool_RawEther_Before = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_Before = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_Before.gt(toBN('0')))
       assert.isTrue(activePool_RawEther_Before.gt(toBN('0')))
 
@@ -2490,7 +2490,7 @@ contract('BorrowerOperations', async accounts => {
       await borrowerOperations.adjustTrove(th._100pct, 0, dec(100, 18), true, alice, alice, dec(1, 'ether'), { from: alice })
 
       const activePool_ETH_After = await activePool.getETH()
-      const activePool_RawEther_After = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_After = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_After.eq(activePool_ETH_Before.add(toBN(dec(1, 18)))))
       assert.isTrue(activePool_RawEther_After.eq(activePool_ETH_Before.add(toBN(dec(1, 18)))))
     })
@@ -2840,7 +2840,7 @@ contract('BorrowerOperations', async accounts => {
 
       // Check active Pool ETH before
       const activePool_ETH_before = await activePool.getETH()
-      const activePool_RawEther_before = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_before = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_before.eq(aliceColl.add(dennisColl)))
       assert.isTrue(activePool_ETH_before.gt(toBN('0')))
       assert.isTrue(activePool_RawEther_before.eq(activePool_ETH_before))
@@ -2853,7 +2853,7 @@ contract('BorrowerOperations', async accounts => {
 
       // Check after
       const activePool_ETH_After = await activePool.getETH()
-      const activePool_RawEther_After = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_After = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_After.eq(dennisColl))
       assert.isTrue(activePool_RawEther_After.eq(dennisColl))
     })
@@ -2922,14 +2922,14 @@ contract('BorrowerOperations', async accounts => {
         const aliceColl = await getTroveEntireColl(alice)
         assert.isTrue(aliceColl.gt(toBN('0')))
 
-        const alice_ETHBalance_Before = web3.utils.toBN(await web3.eth.getBalance(alice))
+        const alice_ETHBalance_Before = web3.utils.toBN(await contracts.stETH.balanceOf(alice))
 
         // to compensate borrowing fees
         await lusdToken.transfer(alice, await lusdToken.balanceOf(dennis), { from: dennis })
 
         await borrowerOperations.closeTrove({ from: alice, gasPrice: 0 })
 
-        const alice_ETHBalance_After = web3.utils.toBN(await web3.eth.getBalance(alice))
+        const alice_ETHBalance_After = web3.utils.toBN(await contracts.stETH.balanceOf(alice))
         const balanceDiff = alice_ETHBalance_After.sub(alice_ETHBalance_Before)
 
         assert.isTrue(balanceDiff.eq(aliceColl))
@@ -3778,7 +3778,7 @@ contract('BorrowerOperations', async accounts => {
 
     it("openTrove(): Increases the activePool ETH and raw ether balance by correct amount", async () => {
       const activePool_ETH_Before = await activePool.getETH()
-      const activePool_RawEther_Before = await web3.eth.getBalance(activePool.address)
+      const activePool_RawEther_Before = await contracts.stETH.balanceOf(activePool.address)
       assert.equal(activePool_ETH_Before, 0)
       assert.equal(activePool_RawEther_Before, 0)
 
@@ -3786,7 +3786,7 @@ contract('BorrowerOperations', async accounts => {
       const aliceCollAfter = await getTroveEntireColl(alice)
 
       const activePool_ETH_After = await activePool.getETH()
-      const activePool_RawEther_After = toBN(await web3.eth.getBalance(activePool.address))
+      const activePool_RawEther_After = toBN(await contracts.stETH.balanceOf(activePool.address))
       assert.isTrue(activePool_ETH_After.eq(aliceCollAfter))
       assert.isTrue(activePool_RawEther_After.eq(aliceCollAfter))
     })
