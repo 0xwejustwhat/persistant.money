@@ -22,7 +22,7 @@ contract('StabilityPool', async accounts => {
     stabilityPool = await StabilityPool.new()
     const mockActivePoolAddress = (await NonPayable.new()).address
     const dumbContractAddress = (await NonPayable.new()).address
-    await stabilityPool.setAddresses(dumbContractAddress, dumbContractAddress, mockActivePoolAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress)
+    await stabilityPool.setAddresses(dumbContractAddress, dumbContractAddress, mockActivePoolAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress)
   })
 
   it('getETH(): gets the recorded ETH balance', async () => {
@@ -45,7 +45,7 @@ contract('ActivePool', async accounts => {
     activePool = await ActivePool.new()
     mockBorrowerOperations = await NonPayable.new()
     const dumbContractAddress = (await NonPayable.new()).address
-    await activePool.setAddresses(mockBorrowerOperations.address, dumbContractAddress, dumbContractAddress, dumbContractAddress)
+    await activePool.setAddresses(mockBorrowerOperations.address, dumbContractAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress)
   })
 
   it('getETH(): gets the recorded ETH balance', async () => {
@@ -128,7 +128,7 @@ contract('DefaultPool', async accounts => {
     defaultPool = await DefaultPool.new()
     mockTroveManager = await NonPayable.new()
     mockActivePool = await NonPayable.new()
-    await defaultPool.setAddresses(mockTroveManager.address, mockActivePool.address)
+    await defaultPool.setAddresses(mockTroveManager.address, mockActivePool.address, mockActivePool.address)
   })
 
   it('getETH(): gets the recorded LUSD balance', async () => {
