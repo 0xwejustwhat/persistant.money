@@ -19,7 +19,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     // --- Connected contract declarations ---
 
-    address stETHAddress;
+    address public stETHAddress;
 
     ITroveManager public troveManager;
 
@@ -461,6 +461,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     // Send ETH to Active Pool and increase its recorded ETH balance
     // To Change
     function _activePoolAddColl(IActivePool _activePool, uint _amount) internal {
+        IERC20(stETHAddress).transfer(address(_activePool), _amount);
         _activePool.addETH(_amount);
     }
 
