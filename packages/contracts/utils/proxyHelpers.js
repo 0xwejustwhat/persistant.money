@@ -92,11 +92,11 @@ class BorrowerOperationsProxy extends Proxy {
   }
 
   async openTrove(...params) {
-    return this.forwardFunction(params, 'openTrove(uint256,uint256,address,address)')
+    return this.forwardFunction(params, 'openTrove(uint256,uint256,address,address,uint256)')
   }
 
   async addColl(...params) {
-    return this.forwardFunction(params, 'addColl(address,address)')
+    return this.forwardFunction(params, 'addColl(address,address,uin256)')
   }
 
   async withdrawColl(...params) {
@@ -116,7 +116,7 @@ class BorrowerOperationsProxy extends Proxy {
   }
 
   async adjustTrove(...params) {
-    return this.forwardFunction(params, 'adjustTrove(uint256,uint256,uint256,bool,address,address)')
+    return this.forwardFunction(params, 'adjustTrove(uint256,uint256,uint256,bool,address,address,uint256)')
   }
 
   async claimRedeemedCollateral(...params) {

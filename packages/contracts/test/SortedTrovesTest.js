@@ -1,5 +1,6 @@
 const deploymentHelper = require("../utils/deploymentHelpers.js")
 const testHelpers = require("../utils/testHelpers.js")
+const stETHAllocator = require("../utils/AllocateSTETH.js")
 
 const SortedTroves = artifacts.require("SortedTroves")
 const SortedTrovesTester = artifacts.require("SortedTrovesTester")
@@ -7,6 +8,7 @@ const TroveManagerTester = artifacts.require("TroveManagerTester")
 const LUSDToken = artifacts.require("LUSDToken")
 
 const th = testHelpers.TestHelper
+const allocator = stETHAllocator.Allocator
 const dec = th.dec
 const toBN = th.toBN
 const mv = testHelpers.MoneyValues
@@ -66,6 +68,8 @@ contract('SortedTroves', async accounts => {
         contracts.borrowerOperations.address
       )
       const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+
+      await allocator.allocate(contracts, accounts.slice(0, 30))
 
       priceFeed = contracts.priceFeedTestnet
       sortedTroves = contracts.sortedTroves
