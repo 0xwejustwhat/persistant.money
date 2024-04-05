@@ -161,6 +161,7 @@ class DeploymentHelper {
       testerContracts.stabilityPool.address,
       testerContracts.borrowerOperations.address
     )
+    testerContracts.stETH = await Token.new(0, "stETH", 18, "stETH")
     return testerContracts
   }
 
