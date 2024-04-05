@@ -692,7 +692,7 @@ class TestHelper {
       extraParams.value = ICR.mul(totalDebt).div(price)
     }
 
-    const tx = await contracts.borrowerOperations.openTrove(maxFeePercentage, lusdAmount, upperHint, lowerHint, extraParams)
+    const tx = await contracts.borrowerOperations.openTrove(maxFeePercentage, lusdAmount, upperHint, lowerHint, extraParams.value)
 
     return {
       lusdAmount,

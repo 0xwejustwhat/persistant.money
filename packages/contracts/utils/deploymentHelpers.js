@@ -46,6 +46,8 @@ const {
   LQTYStakingProxy
 } = require('../utils/proxyHelpers.js')
 
+const Token = artifacts.require('./Token.sol')
+
 /* "Liquity core" consists of all contracts in the core Liquity system.
 
 LQTY contracts consist of only those contracts related to the LQTY Token:
@@ -102,6 +104,8 @@ class DeploymentHelper {
       stabilityPool.address,
       borrowerOperations.address
     )
+    const stETH = await Token.new(100, "stETH", 18, "stETH")
+
     LUSDToken.setAsDeployed(lusdToken)
     DefaultPool.setAsDeployed(defaultPool)
     PriceFeedTestnet.setAsDeployed(priceFeedTestnet)
@@ -114,6 +118,7 @@ class DeploymentHelper {
     FunctionCaller.setAsDeployed(functionCaller)
     BorrowerOperations.setAsDeployed(borrowerOperations)
     HintHelpers.setAsDeployed(hintHelpers)
+    Token.setAsDeployed(stETH)
 
     const coreContracts = {
       priceFeedTestnet,
@@ -127,7 +132,8 @@ class DeploymentHelper {
       collSurplusPool,
       functionCaller,
       borrowerOperations,
-      hintHelpers
+      hintHelpers,
+      stETH
     }
     return coreContracts
   }
@@ -233,6 +239,7 @@ class DeploymentHelper {
       stabilityPool.address,
       borrowerOperations.address
     )
+    const stETH = await Token.new(100, "stETH", 18, "stETH")
     const coreContracts = {
       priceFeedTestnet,
       lusdToken,
@@ -245,7 +252,8 @@ class DeploymentHelper {
       collSurplusPool,
       functionCaller,
       borrowerOperations,
-      hintHelpers
+      hintHelpers,
+      stETH
     }
     return coreContracts
   }
@@ -364,7 +372,8 @@ class DeploymentHelper {
       contracts.priceFeedTestnet.address,
       contracts.sortedTroves.address,
       contracts.lusdToken.address,
-      LQTYContracts.lqtyStaking.address
+      LQTYContracts.lqtyStaking.address,
+      contracts.stETH.address
     )
 
     // set contracts in the Pools
@@ -375,25 +384,30 @@ class DeploymentHelper {
       contracts.lusdToken.address,
       contracts.sortedTroves.address,
       contracts.priceFeedTestnet.address,
-      LQTYContracts.communityIssuance.address
+      LQTYContracts.communityIssuance.address,
+      contracts.stETH.address
     )
 
     await contracts.activePool.setAddresses(
       contracts.borrowerOperations.address,
       contracts.troveManager.address,
       contracts.stabilityPool.address,
-      contracts.defaultPool.address
+      contracts.defaultPool.address,
+      contracts.stETH.address,
+      contracts.collSurplusPool.address
     )
 
     await contracts.defaultPool.setAddresses(
       contracts.troveManager.address,
       contracts.activePool.address,
+      contracts.stETH.address
     )
 
     await contracts.collSurplusPool.setAddresses(
       contracts.borrowerOperations.address,
       contracts.troveManager.address,
       contracts.activePool.address,
+      contracts.stETH.address
     )
 
     // set contracts in HintHelpers
