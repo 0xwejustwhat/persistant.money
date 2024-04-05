@@ -104,7 +104,7 @@ class DeploymentHelper {
       stabilityPool.address,
       borrowerOperations.address
     )
-    const stETH = await Token.new(100, "stETH", 18, "stETH")
+    const stETH = await Token.new(0, "stETH", 18, "stETH")
 
     LUSDToken.setAsDeployed(lusdToken)
     DefaultPool.setAsDeployed(defaultPool)

@@ -812,7 +812,7 @@ class TestHelper {
       const { newColl, newDebt } = await this.getCollAndDebtFromAddColl(contracts, account, amount)
       const {upperHint, lowerHint} = await this.getBorrowerOpsListHint(contracts, newColl, newDebt)
 
-      const tx = await contracts.borrowerOperations.addColl(upperHint, lowerHint, { from: account, value: amount })
+      const tx = await contracts.borrowerOperations.addColl(upperHint, lowerHint, amount, { from: account })
       const gas = this.gasUsed(tx)
       gasCostList.push(gas)
     }
@@ -827,7 +827,7 @@ class TestHelper {
       const { newColl, newDebt } = await this.getCollAndDebtFromAddColl(contracts, account, randCollAmount)
       const {upperHint, lowerHint} = await this.getBorrowerOpsListHint(contracts, newColl, newDebt)
 
-      const tx = await contracts.borrowerOperations.addColl(upperHint, lowerHint, { from: account, value: randCollAmount })
+      const tx = await contracts.borrowerOperations.addColl(upperHint, lowerHint, randCollAmount, { from: account })
       const gas = this.gasUsed(tx)
       gasCostList.push(gas)
     }
