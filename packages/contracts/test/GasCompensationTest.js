@@ -62,7 +62,7 @@ contract('Gas compensation tests', async accounts => {
     )
     const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
 
-    await allocator.allocate(contracts, accounts.slice(0, 20))
+    await allocator.allocate(contracts, accounts.slice(0, 22))
 
     priceFeed = contracts.priceFeedTestnet
     lusdToken = contracts.lusdToken
@@ -382,7 +382,7 @@ contract('Gas compensation tests', async accounts => {
     const liquidatorBalance_after_A = web3.utils.toBN(await contracts.stETH.balanceOf(liquidator))
 
     // Check liquidator's balance increases by 0.5% of A's coll (1 ETH)
-    const compensationReceived_A = (liquidatorBalance_after_A.sub(liquidatorBalance_before_A).add(toBN(A_GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived_A = (liquidatorBalance_after_A.sub(liquidatorBalance_before_A).add(toBN(0))).toString()
     const _0pt5percent_aliceColl = aliceColl.div(web3.utils.toBN('200'))
     assert.equal(compensationReceived_A, _0pt5percent_aliceColl)
 
@@ -412,7 +412,7 @@ contract('Gas compensation tests', async accounts => {
     const liquidatorBalance_after_B = web3.utils.toBN(await contracts.stETH.balanceOf(liquidator))
 
     // Check liquidator's balance increases by B's 0.5% of coll, 2 ETH
-    const compensationReceived_B = (liquidatorBalance_after_B.sub(liquidatorBalance_before_B).add(toBN(B_GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived_B = (liquidatorBalance_after_B.sub(liquidatorBalance_before_B).add(toBN(0))).toString()
     const _0pt5percent_bobColl = bobColl.div(web3.utils.toBN('200'))
     assert.equal(compensationReceived_B, _0pt5percent_bobColl) // 0.5% of 2 ETH
 
@@ -444,7 +444,7 @@ contract('Gas compensation tests', async accounts => {
     const liquidatorBalance_after_C = web3.utils.toBN(await contracts.stETH.balanceOf(liquidator))
 
     // Check liquidator's balance increases by C's 0.5% of coll, 3 ETH
-    const compensationReceived_C = (liquidatorBalance_after_C.sub(liquidatorBalance_before_C).add(toBN(C_GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived_C = (liquidatorBalance_after_C.sub(liquidatorBalance_before_C).add(toBN(0))).toString()
     const _0pt5percent_carolColl = carolColl.div(web3.utils.toBN('200'))
     assert.equal(compensationReceived_C, _0pt5percent_carolColl)
 
@@ -501,7 +501,7 @@ contract('Gas compensation tests', async accounts => {
     const liquidatorBalance_after_A = web3.utils.toBN(await contracts.stETH.balanceOf(liquidator))
 
     // Check liquidator's balance increases by 0.5% of coll
-    const compensationReceived_A = (liquidatorBalance_after_A.sub(liquidatorBalance_before_A).add(toBN(A_GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived_A = (liquidatorBalance_after_A.sub(liquidatorBalance_before_A).add(toBN(0))).toString()
     const _0pt5percent_aliceColl = aliceColl.div(web3.utils.toBN('200'))
     assert.equal(compensationReceived_A, _0pt5percent_aliceColl)
 
@@ -544,7 +544,7 @@ contract('Gas compensation tests', async accounts => {
 
     // Check liquidator's balance increases by $10 worth of coll
     const _0pt5percent_bobColl = bobColl.div(web3.utils.toBN('200'))
-    const compensationReceived_B = (liquidatorBalance_after_B.sub(liquidatorBalance_before_B).add(toBN(B_GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived_B = (liquidatorBalance_after_B.sub(liquidatorBalance_before_B).add(toBN(0))).toString()
     assert.equal(compensationReceived_B, _0pt5percent_bobColl)
 
     // Check SP LUSD has decreased due to the liquidation of B
@@ -605,7 +605,7 @@ contract('Gas compensation tests', async accounts => {
     const liquidatorBalance_after_A = web3.utils.toBN(await contracts.stETH.balanceOf(liquidator))
 
     // Check liquidator's balance increases by 0.5% of coll
-    const compensationReceived_A = (liquidatorBalance_after_A.sub(liquidatorBalance_before_A).add(toBN(A_GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived_A = (liquidatorBalance_after_A.sub(liquidatorBalance_before_A).add(toBN(0))).toString()
     assert.equal(compensationReceived_A, _0pt5percent_aliceColl)
 
     // Check SP LUSD has decreased due to the liquidation of A 
@@ -644,7 +644,7 @@ contract('Gas compensation tests', async accounts => {
     const liquidatorBalance_after_B = web3.utils.toBN(await contracts.stETH.balanceOf(liquidator))
 
     // Check liquidator's balance increases by 0.5% of coll
-    const compensationReceived_B = (liquidatorBalance_after_B.sub(liquidatorBalance_before_B).add(toBN(B_GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived_B = (liquidatorBalance_after_B.sub(liquidatorBalance_before_B).add(toBN(0))).toString()
     assert.equal(compensationReceived_B, _0pt5percent_bobColl)
 
     // Check SP LUSD has decreased due to the liquidation of B
@@ -990,7 +990,7 @@ contract('Gas compensation tests', async accounts => {
     assert.isTrue(LUSDinSP_1.lt(LUSDinSP_0))
 
     // Check liquidator's balance has increased by the expected compensation amount
-    const compensationReceived = (liquidatorBalance_after.sub(liquidatorBalance_before).add(toBN(GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived = (liquidatorBalance_after.sub(liquidatorBalance_before).add(toBN(0))).toString()
     assert.equal(expectedGasComp, compensationReceived)
 
     // Check ETH in stability pool now equals the expected liquidated collateral
@@ -1066,7 +1066,7 @@ contract('Gas compensation tests', async accounts => {
     assert.isTrue(LUSDinDefaultPool_1.gt(LUSDinDefaultPool_0))
 
     // Check liquidator's balance has increased by the expected compensation amount
-    const compensationReceived = (liquidatorBalance_after.sub(liquidatorBalance_before).add(toBN(GAS_Used_Liquidator * GAS_PRICE))).toString()
+    const compensationReceived = (liquidatorBalance_after.sub(liquidatorBalance_before).add(toBN(0))).toString()
 
     assert.isAtMost(th.getDifference(expectedGasComp, compensationReceived), 1000)
 
