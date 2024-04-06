@@ -82,7 +82,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     it("moveETHGainToTrove(): reverts when called by an account that is not StabilityPool", async () => {
       // Attempt call from alice
       try {
-        const tx1= await borrowerOperations.moveETHGainToTrove(bob, bob, bob, { from: bob })
+        const tx1= await borrowerOperations.moveETHGainToTrove(bob, bob, bob, 0, { from: bob })
       } catch (err) {
          assert.include(err.message, "revert")
         // assert.include(err.message, "BorrowerOps: Caller is not Stability Pool")
@@ -262,10 +262,10 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     })
 
     // fallback (payment)	
-    it("fallback(): reverts when called by an account that is not Borrower Operations nor Default Pool", async () => {
+    it("addETH(): reverts when called by an account that is not Borrower Operations nor Default Pool", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await web3.eth.sendTransaction({ from: alice, to: activePool.address, value: 100 })
+        const txAlice = await activePool.addETH(100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -312,10 +312,10 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     })
 
     // fallback (payment)	
-    it("fallback(): reverts when called by an account that is not the Active Pool", async () => {
+    it("addETH(): reverts when called by an account that is not the Active Pool", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await web3.eth.sendTransaction({ from: alice, to: defaultPool.address, value: 100 })
+        const txAlice = await defaultPool.addETH(100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -342,10 +342,10 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     // --- onlyActivePool ---
 
     // fallback (payment)	
-    it("fallback(): reverts when called by an account that is not the Active Pool", async () => {
+    it("addETH(): reverts when called by an account that is not the Active Pool", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await web3.eth.sendTransaction({ from: alice, to: stabilityPool.address, value: 100 })
+        const txAlice = await stabilityPool.addETH(100, { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
