@@ -237,6 +237,7 @@ contract('StabilityPool - LQTY Rewards', async accounts => {
 
       // Check gains are correct, error tolerance = 1e-6 of a token
 
+      console.log(A_LQTYGain_1yr.toString(), expectedLQTYGain_1yr.toString())
       assert.isAtMost(getDifference(A_LQTYGain_1yr, expectedLQTYGain_1yr), 1e12)
       assert.isAtMost(getDifference(B_LQTYGain_1yr, expectedLQTYGain_1yr), 1e12)
       assert.isAtMost(getDifference(C_LQTYGain_1yr, expectedLQTYGain_1yr), 1e12)

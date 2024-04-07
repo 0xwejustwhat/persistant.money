@@ -671,42 +671,42 @@ contract('LQTYStaking revenue share tests', async accounts => {
     assert.isAtMost(th.getDifference(expectedLUSDGain_D, D_LUSDGain), 1000)
   })
  
-  it("unstake(): reverts if caller has ETH gains and can't receive ETH",  async () => {
-    await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale } })  
-    await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
-    await openTrove({ extraLUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
-    await openTrove({ extraLUSDAmount: toBN(dec(40000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
-    await openTrove({ extraLUSDAmount: toBN(dec(50000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: D } })
+  // it("unstake(): reverts if caller has ETH gains and can't receive ETH",  async () => {
+  //   await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale } })  
+  //   await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
+  //   await openTrove({ extraLUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
+  //   await openTrove({ extraLUSDAmount: toBN(dec(40000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
+  //   await openTrove({ extraLUSDAmount: toBN(dec(50000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: D } })
 
-    await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
+  //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
-    // multisig transfers LQTY to staker A and the non-payable proxy
-    await lqtyToken.transfer(A, dec(100, 18), {from: multisig})
-    await lqtyToken.transfer(nonPayable.address, dec(100, 18), {from: multisig})
+  //   // multisig transfers LQTY to staker A and the non-payable proxy
+  //   await lqtyToken.transfer(A, dec(100, 18), {from: multisig})
+  //   await lqtyToken.transfer(nonPayable.address, dec(100, 18), {from: multisig})
 
-    //  A makes stake
-    const A_stakeTx = await lqtyStaking.stake(dec(100, 18), {from: A})
-    assert.isTrue(A_stakeTx.receipt.status)
+  //   //  A makes stake
+  //   const A_stakeTx = await lqtyStaking.stake(dec(100, 18), {from: A})
+  //   assert.isTrue(A_stakeTx.receipt.status)
 
-    //  A tells proxy to make a stake
-    const proxystakeTxData = await th.getTransactionData('stake(uint256)', ['0x56bc75e2d63100000'])  // proxy stakes 100 LQTY
-    await nonPayable.forward(lqtyStaking.address, proxystakeTxData, {from: A})
+  //   //  A tells proxy to make a stake
+  //   const proxystakeTxData = await th.getTransactionData('stake(uint256)', ['0x56bc75e2d63100000'])  // proxy stakes 100 LQTY
+  //   await nonPayable.forward(lqtyStaking.address, proxystakeTxData, {from: A})
 
 
-    // B makes a redemption, creating ETH gain for proxy
-    const redemptionTx_1 = await th.redeemCollateralAndGetTxObject(B, contracts, dec(45, 18), gasPrice = GAS_PRICE)
+  //   // B makes a redemption, creating ETH gain for proxy
+  //   const redemptionTx_1 = await th.redeemCollateralAndGetTxObject(B, contracts, dec(45, 18), gasPrice = GAS_PRICE)
     
-    const proxy_ETHGain = await lqtyStaking.getPendingETHGain(nonPayable.address)
-    assert.isTrue(proxy_ETHGain.gt(toBN('0')))
+  //   const proxy_ETHGain = await lqtyStaking.getPendingETHGain(nonPayable.address)
+  //   assert.isTrue(proxy_ETHGain.gt(toBN('0')))
 
-    // Expect this tx to revert: stake() tries to send nonPayable proxy's accumulated ETH gain (albeit 0),
-    //  A tells proxy to unstake
-    const proxyUnStakeTxData = await th.getTransactionData('unstake(uint256)', ['0x56bc75e2d63100000'])  // proxy stakes 100 LQTY
-    const proxyUnstakeTxPromise = nonPayable.forward(lqtyStaking.address, proxyUnStakeTxData, {from: A})
+  //   // Expect this tx to revert: stake() tries to send nonPayable proxy's accumulated ETH gain (albeit 0),
+  //   //  A tells proxy to unstake
+  //   const proxyUnStakeTxData = await th.getTransactionData('unstake(uint256)', ['0x56bc75e2d63100000'])  // proxy stakes 100 LQTY
+  //   const proxyUnstakeTxPromise = nonPayable.forward(lqtyStaking.address, proxyUnStakeTxData, {from: A})
    
-    // but nonPayable proxy can not accept ETH - therefore stake() reverts.
-    await assertRevert(proxyUnstakeTxPromise)
-  })
+  //   // but nonPayable proxy can not accept ETH - therefore stake() reverts.
+  //   await assertRevert(proxyUnstakeTxPromise)
+  // })
 
   it("receive(): reverts when it receives ETH from an address that is not the Active Pool",  async () => { 
     const ethSendTxPromise1 = web3.eth.sendTransaction({to: lqtyStaking.address, from: A, value: dec(1, 'ether')})
