@@ -124,7 +124,7 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     const recoveryMode_Before = await th.checkRecoveryMode(contracts);
     assert.isTrue(recoveryMode_Before)
 
-    await borrowerOperations.addColl(alice, alice, { from: alice, value: '1' })
+    await borrowerOperations.addColl(alice, alice, '1', { from: alice })
 
     const recoveryMode_After = await th.checkRecoveryMode(contracts);
     assert.isTrue(recoveryMode_After)
@@ -160,7 +160,7 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     const recoveryMode_Before = await th.checkRecoveryMode(contracts);
     assert.isTrue(recoveryMode_Before)
 
-    await borrowerOperations.addColl(alice, alice, { from: alice, value: A_coll })
+    await borrowerOperations.addColl(alice, alice, A_coll, { from: alice })
 
     const recoveryMode_After = await th.checkRecoveryMode(contracts);
     assert.isFalse(recoveryMode_After)
@@ -626,10 +626,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     const bob_remainingCollateral = B_coll.sub(B_totalDebt.mul(th.toBN(dec(11, 17))).div(price))
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_remainingCollateral)
     // can claim collateral
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance = bob_balanceBefore.sub(th.toBN(BOB_GAS * GAS_PRICE))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance = bob_balanceBefore //.sub(th.toBN(BOB_GAS * GAS_PRICE))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter, bob_expectedBalance.add(th.toBN(bob_remainingCollateral)))
   })
 
@@ -722,10 +722,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     const bob_remainingCollateral = B_coll.sub(B_totalDebt.mul(th.toBN(dec(11, 17))).div(price))
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_remainingCollateral)
     // can claim collateral
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance = bob_balanceBefore.sub(th.toBN(BOB_GAS * GAS_PRICE))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance = bob_balanceBefore // .sub(th.toBN(BOB_GAS * GAS_PRICE))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter, bob_expectedBalance.add(th.toBN(bob_remainingCollateral)))
   })
 
@@ -815,10 +815,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     const bob_remainingCollateral = B_coll.sub(B_totalDebt.mul(th.toBN(dec(11, 17))).div(price))
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_remainingCollateral)
     // can claim collateral
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance = bob_balanceBefore.sub(th.toBN(BOB_GAS * GAS_PRICE))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance = bob_balanceBefore // .sub(th.toBN(BOB_GAS * GAS_PRICE))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter, bob_expectedBalance.add(th.toBN(bob_remainingCollateral)))
   })
 
@@ -890,22 +890,22 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(carol), carol_remainingCollateral)
 
     // can claim collateral
-    const dennis_balanceBefore = th.toBN(await web3.eth.getBalance(dennis))
+    const dennis_balanceBefore = th.toBN(await contracts.stETH.balanceOf(dennis))
     const DENNIS_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: dennis, gasPrice: GAS_PRICE  }))
-    const dennis_expectedBalance = dennis_balanceBefore.sub(th.toBN(DENNIS_GAS * GAS_PRICE))
-    const dennis_balanceAfter = th.toBN(await web3.eth.getBalance(dennis))
+    const dennis_expectedBalance = dennis_balanceBefore // .sub(th.toBN(DENNIS_GAS * GAS_PRICE))
+    const dennis_balanceAfter = th.toBN(await contracts.stETH.balanceOf(dennis))
     assert.isTrue(dennis_balanceAfter.eq(dennis_expectedBalance.add(th.toBN(dennis_remainingCollateral))))
 
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance = bob_balanceBefore.sub(th.toBN(BOB_GAS * GAS_PRICE))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance = bob_balanceBefore // .sub(th.toBN(BOB_GAS * GAS_PRICE))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter, bob_expectedBalance.add(th.toBN(bob_remainingCollateral)))
 
-    const carol_balanceBefore = th.toBN(await web3.eth.getBalance(carol))
+    const carol_balanceBefore = th.toBN(await contracts.stETH.balanceOf(carol))
     const CAROL_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: carol, gasPrice: GAS_PRICE  }))
-    const carol_expectedBalance = carol_balanceBefore.sub(th.toBN(CAROL_GAS * GAS_PRICE))
-    const carol_balanceAfter = th.toBN(await web3.eth.getBalance(carol))
+    const carol_expectedBalance = carol_balanceBefore // .sub(th.toBN(CAROL_GAS * GAS_PRICE))
+    const carol_balanceAfter = th.toBN(await contracts.stETH.balanceOf(carol))
     th.assertIsApproximatelyEqual(carol_balanceAfter, carol_expectedBalance.add(th.toBN(carol_remainingCollateral)))
   })
 
@@ -1634,10 +1634,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     const bob_remainingCollateral = B_coll.sub(B_totalDebt.mul(th.toBN(dec(11, 17))).div(price))
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_remainingCollateral)
     // can claim collateral
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance = bob_balanceBefore.sub(th.toBN(BOB_GAS * GAS_PRICE))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance = bob_balanceBefore // .sub(th.toBN(BOB_GAS * GAS_PRICE))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter, bob_expectedBalance.add(th.toBN(bob_remainingCollateral)))
 
     // skip bootstrapping phase
@@ -1653,10 +1653,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     const bob_surplus = B_coll_2.sub(B_netDebt_2.mul(mv._1e18BN).div(price))
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_surplus)
     // can claim collateral
-    const bob_balanceBefore_2 = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore_2 = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS_2 = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance_2 = bob_balanceBefore_2.sub(th.toBN(BOB_GAS_2 * GAS_PRICE))
-    const bob_balanceAfter_2 = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance_2 = bob_balanceBefore_2 //.sub(th.toBN(BOB_GAS_2 * GAS_PRICE))
+    const bob_balanceAfter_2 = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter_2, bob_expectedBalance_2.add(th.toBN(bob_surplus)))
   })
 
@@ -1678,10 +1678,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_surplus)
 
     // can claim collateral
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance = bob_balanceBefore.sub(th.toBN(BOB_GAS * GAS_PRICE))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance = bob_balanceBefore // .sub(th.toBN(BOB_GAS * GAS_PRICE))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter, bob_expectedBalance.add(bob_surplus))
 
     // Bob re-opens the trove, price 200, total debt 250 LUSD, ICR = 240% (lowest one)
@@ -1712,10 +1712,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual((await collSurplusPool.getCollateral(bob)).toString(), bob_remainingCollateral.toString())
 
     // can claim collateral
-    const bob_balanceBefore_2 = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore_2 = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS_2 = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_expectedBalance_2 = bob_balanceBefore_2.sub(th.toBN(BOB_GAS_2 * GAS_PRICE))
-    const bob_balanceAfter_2 = th.toBN(await web3.eth.getBalance(bob))
+    const bob_expectedBalance_2 = bob_balanceBefore_2 // .sub(th.toBN(BOB_GAS_2 * GAS_PRICE))
+    const bob_balanceAfter_2 = th.toBN(await contracts.stETH.balanceOf(bob))
     th.assertIsApproximatelyEqual(bob_balanceAfter_2, bob_expectedBalance_2.add(th.toBN(bob_remainingCollateral)))
   })
 
@@ -2376,16 +2376,16 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(greta), greta_remainingCollateral)
 
     // can claim collateral
-    const freddy_balanceBefore = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_balanceBefore = th.toBN(await contracts.stETH.balanceOf(freddy))
     const FREDDY_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: freddy, gasPrice: GAS_PRICE  }))
-    const freddy_expectedBalance = freddy_balanceBefore.sub(th.toBN(FREDDY_GAS * GAS_PRICE))
-    const freddy_balanceAfter = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_expectedBalance = freddy_balanceBefore // .sub(th.toBN(FREDDY_GAS * GAS_PRICE))
+    const freddy_balanceAfter = th.toBN(await contracts.stETH.balanceOf(freddy))
     th.assertIsApproximatelyEqual(freddy_balanceAfter, freddy_expectedBalance.add(th.toBN(freddy_remainingCollateral)))
 
-    const greta_balanceBefore = th.toBN(await web3.eth.getBalance(greta))
+    const greta_balanceBefore = th.toBN(await contracts.stETH.balanceOf(greta))
     const GRETA_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: greta, gasPrice: GAS_PRICE  }))
-    const greta_expectedBalance = greta_balanceBefore.sub(th.toBN(GRETA_GAS * GAS_PRICE))
-    const greta_balanceAfter = th.toBN(await web3.eth.getBalance(greta))
+    const greta_expectedBalance = greta_balanceBefore // .sub(th.toBN(GRETA_GAS * GAS_PRICE))
+    const greta_balanceAfter = th.toBN(await contracts.stETH.balanceOf(greta))
     th.assertIsApproximatelyEqual(greta_balanceAfter, greta_expectedBalance.add(th.toBN(greta_remainingCollateral)))
   })
 
@@ -2457,16 +2457,16 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(greta), greta_remainingCollateral)
 
     // can claim collateral
-    const freddy_balanceBefore = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_balanceBefore = th.toBN(await contracts.stETH.balanceOf(freddy))
     const FREDDY_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: freddy, gasPrice: GAS_PRICE  }))
-    const freddy_expectedBalance = freddy_balanceBefore.sub(th.toBN(FREDDY_GAS * GAS_PRICE))
-    const freddy_balanceAfter = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_expectedBalance = freddy_balanceBefore // .sub(th.toBN(FREDDY_GAS * GAS_PRICE))
+    const freddy_balanceAfter = th.toBN(await contracts.stETH.balanceOf(freddy))
     th.assertIsApproximatelyEqual(freddy_balanceAfter, freddy_expectedBalance.add(th.toBN(freddy_remainingCollateral)))
 
-    const greta_balanceBefore = th.toBN(await web3.eth.getBalance(greta))
+    const greta_balanceBefore = th.toBN(await contracts.stETH.balanceOf(greta))
     const GRETA_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: greta, gasPrice: GAS_PRICE  }))
-    const greta_expectedBalance = greta_balanceBefore.sub(th.toBN(GRETA_GAS * GAS_PRICE))
-    const greta_balanceAfter = th.toBN(await web3.eth.getBalance(greta))
+    const greta_expectedBalance = greta_balanceBefore // .sub(th.toBN(GRETA_GAS * GAS_PRICE))
+    const greta_balanceAfter = th.toBN(await contracts.stETH.balanceOf(greta))
     th.assertIsApproximatelyEqual(greta_balanceAfter, greta_expectedBalance.add(th.toBN(greta_remainingCollateral)))
   })
 
@@ -2983,15 +2983,15 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_remainingCollateral)
 
     // can claim collateral
-    const alice_balanceBefore = th.toBN(await web3.eth.getBalance(alice))
+    const alice_balanceBefore = th.toBN(await contracts.stETH.balanceOf(alice))
     const ALICE_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: alice, gasPrice: GAS_PRICE  }))
-    const alice_balanceAfter = th.toBN(await web3.eth.getBalance(alice))
-    th.assertIsApproximatelyEqual(alice_balanceAfter, alice_balanceBefore.add(th.toBN(alice_remainingCollateral).sub(th.toBN(ALICE_GAS * GAS_PRICE))))
+    const alice_balanceAfter = th.toBN(await contracts.stETH.balanceOf(alice))
+    th.assertIsApproximatelyEqual(alice_balanceAfter, alice_balanceBefore.add(th.toBN(alice_remainingCollateral).sub(th.toBN(0))))
 
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
-    th.assertIsApproximatelyEqual(bob_balanceAfter, bob_balanceBefore.add(th.toBN(bob_remainingCollateral).sub(th.toBN(BOB_GAS * GAS_PRICE))))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
+    th.assertIsApproximatelyEqual(bob_balanceAfter, bob_balanceBefore.add(th.toBN(bob_remainingCollateral).sub(th.toBN(0))))
   })
 
   it("liquidateTroves() with a non fullfilled liquidation: ICR of non liquidated trove does not change", async () => {
@@ -3637,15 +3637,15 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(bob), bob_remainingCollateral)
 
     // can claim collateral
-    const alice_balanceBefore = th.toBN(await web3.eth.getBalance(alice))
+    const alice_balanceBefore = th.toBN(await contracts.stETH.balanceOf(alice))
     const ALICE_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: alice, gasPrice: GAS_PRICE  }))
-    const alice_balanceAfter = th.toBN(await web3.eth.getBalance(alice))
+    const alice_balanceAfter = th.toBN(await contracts.stETH.balanceOf(alice))
     //th.assertIsApproximatelyEqual(alice_balanceAfter, alice_balanceBefore.add(th.toBN(alice_remainingCollateral).sub(th.toBN(ALICE_GAS * GAS_PRICE))))
 
-    const bob_balanceBefore = th.toBN(await web3.eth.getBalance(bob))
+    const bob_balanceBefore = th.toBN(await contracts.stETH.balanceOf(bob))
     const BOB_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: bob, gasPrice: GAS_PRICE  }))
-    const bob_balanceAfter = th.toBN(await web3.eth.getBalance(bob))
-    th.assertIsApproximatelyEqual(bob_balanceAfter, bob_balanceBefore.add(th.toBN(bob_remainingCollateral).sub(th.toBN(BOB_GAS * GAS_PRICE))))
+    const bob_balanceAfter = th.toBN(await contracts.stETH.balanceOf(bob))
+    th.assertIsApproximatelyEqual(bob_balanceAfter, bob_balanceBefore.add(th.toBN(bob_remainingCollateral).sub(th.toBN(0))))
   })
 
   it("batchLiquidateTroves() with a non fullfilled liquidation: ICR of non liquidated trove does not change", async () => {
@@ -4010,16 +4010,16 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(greta), greta_remainingCollateral)
 
     // can claim collateral
-    const freddy_balanceBefore = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_balanceBefore = th.toBN(await contracts.stETH.balanceOf(freddy))
     const FREDDY_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: freddy, gasPrice: GAS_PRICE  }))
-    const freddy_expectedBalance = freddy_balanceBefore.sub(th.toBN(FREDDY_GAS * GAS_PRICE))
-    const freddy_balanceAfter = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_expectedBalance = freddy_balanceBefore //.sub(th.toBN(FREDDY_GAS * GAS_PRICE))
+    const freddy_balanceAfter = th.toBN(await contracts.stETH.balanceOf(freddy))
     th.assertIsApproximatelyEqual(freddy_balanceAfter, freddy_expectedBalance.add(th.toBN(freddy_remainingCollateral)))
 
-    const greta_balanceBefore = th.toBN(await web3.eth.getBalance(greta))
+    const greta_balanceBefore = th.toBN(await contracts.stETH.balanceOf(greta))
     const GRETA_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: greta, gasPrice: GAS_PRICE  }))
-    const greta_expectedBalance = greta_balanceBefore.sub(th.toBN(GRETA_GAS * GAS_PRICE))
-    const greta_balanceAfter = th.toBN(await web3.eth.getBalance(greta))
+    const greta_expectedBalance = greta_balanceBefore // .sub(th.toBN(GRETA_GAS * GAS_PRICE))
+    const greta_balanceAfter = th.toBN(await contracts.stETH.balanceOf(greta))
     th.assertIsApproximatelyEqual(greta_balanceAfter, greta_expectedBalance.add(th.toBN(greta_remainingCollateral)))
   })
 
@@ -4093,16 +4093,16 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(greta), greta_remainingCollateral)
 
     // can claim collateral
-    const freddy_balanceBefore = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_balanceBefore = th.toBN(await contracts.stETH.balanceOf(freddy))
     const FREDDY_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: freddy, gasPrice: GAS_PRICE  }))
-    const freddy_expectedBalance = freddy_balanceBefore.sub(th.toBN(FREDDY_GAS * GAS_PRICE))
-    const freddy_balanceAfter = th.toBN(await web3.eth.getBalance(freddy))
+    const freddy_expectedBalance = freddy_balanceBefore // .sub(th.toBN(FREDDY_GAS * GAS_PRICE))
+    const freddy_balanceAfter = th.toBN(await contracts.stETH.balanceOf(freddy))
     th.assertIsApproximatelyEqual(freddy_balanceAfter, freddy_expectedBalance.add(th.toBN(freddy_remainingCollateral)))
 
-    const greta_balanceBefore = th.toBN(await web3.eth.getBalance(greta))
+    const greta_balanceBefore = th.toBN(await contracts.stETH.balanceOf(greta))
     const GRETA_GAS = th.gasUsed(await borrowerOperations.claimCollateral({ from: greta, gasPrice: GAS_PRICE  }))
-    const greta_expectedBalance = greta_balanceBefore.sub(th.toBN(GRETA_GAS * GAS_PRICE))
-    const greta_balanceAfter = th.toBN(await web3.eth.getBalance(greta))
+    const greta_expectedBalance = greta_balanceBefore // .sub(th.toBN(GRETA_GAS * GAS_PRICE))
+    const greta_balanceAfter = th.toBN(await contracts.stETH.balanceOf(greta))
     th.assertIsApproximatelyEqual(greta_balanceAfter, greta_expectedBalance.add(th.toBN(greta_remainingCollateral)))
   })
 
