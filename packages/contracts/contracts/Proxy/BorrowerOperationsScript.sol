@@ -4,6 +4,7 @@ pragma solidity 0.6.11;
 
 import "../Dependencies/CheckContract.sol";
 import "../Dependencies/IERC20.sol";
+import "../Dependencies/console.sol";
 import "../Interfaces/IBorrowerOperations.sol";
 
 
@@ -20,11 +21,13 @@ contract BorrowerOperationsScript is CheckContract {
 
     function openTrove(uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint, uint amount) external {
         IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
+        IERC20(stETHAddress).approve(address(borrowerOperations), amount);
         borrowerOperations.openTrove(_maxFee, _LUSDAmount, _upperHint, _lowerHint, amount);
     }
 
     function addColl(address _upperHint, address _lowerHint, uint amount) external {
         IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
+        IERC20(stETHAddress).approve(address(borrowerOperations), amount);
         borrowerOperations.addColl(_upperHint, _lowerHint, amount);
     }
 
@@ -46,6 +49,7 @@ contract BorrowerOperationsScript is CheckContract {
 
     function adjustTrove(uint _maxFee, uint _collWithdrawal, uint _debtChange, bool isDebtIncrease, address _upperHint, address _lowerHint, uint amount) external {
         IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
+        IERC20(stETHAddress).approve(address(borrowerOperations), amount);
         borrowerOperations.adjustTrove(_maxFee, _collWithdrawal, _debtChange, isDebtIncrease, _upperHint, _lowerHint, amount);
     }
 

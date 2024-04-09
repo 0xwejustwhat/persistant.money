@@ -68,12 +68,15 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
 
         IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
 
-        uint balanceBefore = address(this).balance;
+        IERC20(stETHAddress).approve(address(borrowerOperations), amount);
+
+        uint balanceBefore = IERC20(stETHAddress).balanceOf(address(this));
 
         // Claim collateral
         borrowerOperations.claimCollateral();
 
-        uint balanceAfter = address(this).balance;
+
+        uint balanceAfter = IERC20(stETHAddress).balanceOf(address(this));
 
         // already checked in CollSurplusPool
         assert(balanceAfter > balanceBefore);
@@ -85,13 +88,13 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
     }
 
     function claimSPRewardsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
-        uint collBalanceBefore = address(this).balance;
+        uint collBalanceBefore = IERC20(stETHAddress).balanceOf(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
 
         // Claim rewards
         stabilityPool.withdrawFromSP(0);
 
-        uint collBalanceAfter = address(this).balance;
+        uint collBalanceAfter = IERC20(stETHAddress).balanceOf(address(this));
         uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
         uint claimedCollateral = collBalanceAfter.sub(collBalanceBefore);
 
@@ -114,14 +117,14 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
     }
 
     function claimStakingGainsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
-        uint collBalanceBefore = address(this).balance;
+        uint collBalanceBefore = IERC20(stETHAddress).balanceOf(address(this));
         uint lusdBalanceBefore = lusdToken.balanceOf(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
 
         // Claim gains
         lqtyStaking.unstake(0);
 
-        uint gainedCollateral = address(this).balance.sub(collBalanceBefore); // stack too deep issues :'(
+        uint gainedCollateral = IERC20(stETHAddress).balanceOf(address(this)).sub(collBalanceBefore); // stack too deep issues :'(
         uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(lusdBalanceBefore);
 
         uint netLUSDAmount;

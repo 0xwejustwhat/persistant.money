@@ -154,7 +154,7 @@ class BorrowerWrappersProxy extends Proxy {
   }
 
   async claimCollateralAndOpenTrove(...params) {
-    return this.forwardFunction(params, 'claimCollateralAndOpenTrove(uint256,uint256,address,address)')
+    return this.forwardFunction(params, 'claimCollateralAndOpenTrove(uint256,uint256,address,address,uint256)')
   }
 
   async claimSPRewardsAndRecycle(...params) {

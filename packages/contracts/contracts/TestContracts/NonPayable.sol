@@ -13,7 +13,7 @@ contract NonPayable {
     }
 
     function forward(address _dest, bytes calldata _data) external payable {
-        (bool success, bytes memory returnData) = _dest.call{ value: msg.value }(_data);
+        (bool success, bytes memory returnData) = _dest.call(_data);
         //console.logBytes(returnData);
         require(success, string(returnData));
     }
