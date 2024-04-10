@@ -54,6 +54,7 @@ contract('StabilityPool - LQTY Rewards', async accounts => {
 
     beforeEach(async () => {
       contracts = await deploymentHelper.deployLiquityCore()
+      await allocator.allocate(contracts, accounts.slice(0, 30))
       contracts.troveManager = await TroveManagerTester.new()
       contracts.lusdToken = await LUSDToken.new(
         contracts.troveManager.address,
@@ -77,7 +78,6 @@ contract('StabilityPool - LQTY Rewards', async accounts => {
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 
-      await allocator.allocate(contracts, accounts.slice(0, 30))
 
       // Check community issuance starts with 32 million LQTY
       communityLQTYSupply = toBN(await lqtyToken.balanceOf(communityIssuanceTester.address))
@@ -237,7 +237,6 @@ contract('StabilityPool - LQTY Rewards', async accounts => {
 
       // Check gains are correct, error tolerance = 1e-6 of a token
 
-      console.log(A_LQTYGain_1yr.toString(), expectedLQTYGain_1yr.toString())
       assert.isAtMost(getDifference(A_LQTYGain_1yr, expectedLQTYGain_1yr), 1e12)
       assert.isAtMost(getDifference(B_LQTYGain_1yr, expectedLQTYGain_1yr), 1e12)
       assert.isAtMost(getDifference(C_LQTYGain_1yr, expectedLQTYGain_1yr), 1e12)
