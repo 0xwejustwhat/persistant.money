@@ -132,6 +132,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this));
             netLUSDAmount = _getNetLUSDAmount(gainedCollateral);
+            IERC20(stETHAddress).approve(address(borrowerOperations), gainedCollateral);
             borrowerOperations.adjustTrove(_maxFee, 0, netLUSDAmount, true, _upperHint, _lowerHint, gainedCollateral);
         }
 
