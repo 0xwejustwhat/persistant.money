@@ -743,8 +743,8 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint firstPortion = epochToScaleToG[epochSnapshot][scaleSnapshot].sub(G_Snapshot);
         uint secondPortion = epochToScaleToG[epochSnapshot][scaleSnapshot.add(1)].div(SCALE_FACTOR);
 
-        uint LQTYGain = initialStake.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(DECIMAL_PRECISION);
-
+        uint LQTYGain = initialStake.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(DECIMAL_PRECISION); 
+         
         return LQTYGain;
     }
 
@@ -836,7 +836,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit StabilityPoolLUSDBalanceUpdated(newTotalLUSDDeposits);
     }
 
-    // To Change
     function _sendETHGainToDepositor(uint _amount) internal {
         if (_amount == 0) {return;}
         uint newETH = ETH.sub(_amount);

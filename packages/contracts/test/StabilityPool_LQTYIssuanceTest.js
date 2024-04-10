@@ -62,8 +62,6 @@ contract('StabilityPool - LQTY Rewards', async accounts => {
       )
       const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisig)
 
-      await allocator.allocate(contracts, accounts.slice(0, 30))
-
       priceFeed = contracts.priceFeedTestnet
       lusdToken = contracts.lusdToken
       stabilityPool = contracts.stabilityPool
@@ -78,6 +76,8 @@ contract('StabilityPool - LQTY Rewards', async accounts => {
       await deploymentHelper.connectLQTYContracts(LQTYContracts)
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+
+      await allocator.allocate(contracts, accounts.slice(0, 30))
 
       // Check community issuance starts with 32 million LQTY
       communityLQTYSupply = toBN(await lqtyToken.balanceOf(communityIssuanceTester.address))
