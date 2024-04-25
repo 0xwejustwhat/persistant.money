@@ -32,7 +32,12 @@ const deployContractAndGetBlockNumber = async (
   ...args: unknown[]
 ): Promise<[address: string, blockNumber: number]> => {
   log(`Deploying ${contractName} ...`);
-  const contract = await (await getContractFactory(contractName, deployer)).deploy(...args);
+  let contract;
+  if (contractName == "Token") {
+    contract = await (await getContractFactory(contractName, deployer)).deploy(0, "Token", 18, "TKN", ...args);
+  } else {
+    contract = await (await getContractFactory(contractName, deployer)).deploy(...args);
+  }
 
   log(`Waiting for transaction ${contract.deployTransaction.hash} ...`);
   const receipt = await contract.deployTransaction.wait();
@@ -103,7 +108,8 @@ const deployContracts = async (
     gasPool: await deployContract(deployer, getContractFactory, "GasPool", {
       ...overrides
     }),
-    unipool: await deployContract(deployer, getContractFactory, "Unipool", { ...overrides })
+    unipool: await deployContract(deployer, getContractFactory, "Unipool", { ...overrides }),
+    token: await deployContract(deployer, getContractFactory, "Token", { ...overrides })
   };
 
   return [
@@ -172,7 +178,8 @@ const connectContracts = async (
     stabilityPool,
     gasPool,
     unipool,
-    uniToken
+    uniToken,
+    token
   }: _LiquityContracts,
   deployer: Signer,
   overrides?: Overrides
@@ -218,8 +225,10 @@ const connectContracts = async (
         sortedTroves.address,
         lusdToken.address,
         lqtyStaking.address,
+        token.address,
         { ...overrides, nonce }
-      ),
+      )
+    ,
 
     nonce =>
       stabilityPool.setAddresses(
@@ -230,6 +239,7 @@ const connectContracts = async (
         sortedTroves.address,
         priceFeed.address,
         communityIssuance.address,
+        token.address,
         { ...overrides, nonce }
       ),
 
@@ -239,11 +249,13 @@ const connectContracts = async (
         troveManager.address,
         stabilityPool.address,
         defaultPool.address,
+        token.address,
+        collSurplusPool.address, 
         { ...overrides, nonce }
       ),
 
     nonce =>
-      defaultPool.setAddresses(troveManager.address, activePool.address, {
+      defaultPool.setAddresses(troveManager.address, activePool.address, token.address, {
         ...overrides,
         nonce
       }),
@@ -253,6 +265,7 @@ const connectContracts = async (
         borrowerOperations.address,
         troveManager.address,
         activePool.address,
+        token.address,
         { ...overrides, nonce }
       ),
 
@@ -269,6 +282,7 @@ const connectContracts = async (
         troveManager.address,
         borrowerOperations.address,
         activePool.address,
+        token.address,
         { ...overrides, nonce }
       ),
 
@@ -295,6 +309,134 @@ const connectContracts = async (
 
   let i = 0;
   await Promise.all(txs.map(tx => tx.wait().then(() => log(`Connected ${++i}`))));
+
+
+  // let nonce = txCount
+
+  // console.log(nonce)
+  // await sortedTroves.setParams(1e6, troveManager.address, borrowerOperations.address, {
+  //       ...overrides,
+  //       nonce
+  //     });
+
+  // nonce++;
+  // console.log(nonce)
+  // await troveManager.setAddresses(
+  //       borrowerOperations.address,
+  //       activePool.address,
+  //       defaultPool.address,
+  //       stabilityPool.address,
+  //       gasPool.address,
+  //       collSurplusPool.address,
+  //       priceFeed.address,
+  //       lusdToken.address,
+  //       sortedTroves.address,
+  //       lqtyToken.address,
+  //       lqtyStaking.address,
+  //       { ...overrides, nonce }
+  //     );
+
+  // nonce++;
+  // console.log(nonce)
+  // console.log("borrower operation")
+  // await borrowerOperations.setAddresses(
+  //       troveManager.address,
+  //       activePool.address,
+  //       defaultPool.address,
+  //       stabilityPool.address,
+  //       gasPool.address,
+  //       collSurplusPool.address,
+  //       priceFeed.address,
+  //       sortedTroves.address,
+  //       lusdToken.address,
+  //       lqtyStaking.address,
+  //       token.address,
+  //       { ...overrides, nonce }
+  //     );
+
+  // nonce++;
+  // console.log(nonce)
+  // await stabilityPool.setAddresses(
+  //       borrowerOperations.address,
+  //       troveManager.address,
+  //       activePool.address,
+  //       lusdToken.address,
+  //       sortedTroves.address,
+  //       priceFeed.address,
+  //       communityIssuance.address,
+  //       token.address,
+  //       { ...overrides, nonce }
+  //     );
+
+  // nonce++;
+  // console.log(nonce)
+  // await activePool.setAddresses(
+  //       borrowerOperations.address,
+  //       troveManager.address,
+  //       stabilityPool.address,
+  //       defaultPool.address,
+  //       token.address,
+  //       collSurplusPool.address, 
+  //       { ...overrides, nonce }
+  //     );
+
+  // nonce++;
+  // console.log(nonce)
+  // await defaultPool.setAddresses(troveManager.address, activePool.address, token.address, {
+  //       ...overrides,
+  //       nonce
+  //     });
+
+  // nonce++;
+  // console.log(nonce)
+  // await collSurplusPool.setAddresses(
+  //       borrowerOperations.address,
+  //       troveManager.address,
+  //       activePool.address,
+  //       token.address,
+  //       { ...overrides, nonce }
+  //     );
+
+  // nonce++;
+  // console.log(nonce)
+  // await hintHelpers.setAddresses(sortedTroves.address, troveManager.address, {
+  //       ...overrides,
+  //       nonce
+  //     });
+
+  // nonce++;
+  // console.log(nonce)
+  // await lqtyStaking.setAddresses(
+  //       lqtyToken.address,
+  //       lusdToken.address,
+  //       troveManager.address,
+  //       borrowerOperations.address,
+  //       activePool.address,
+  //       token.address,
+  //       { ...overrides, nonce }
+  //     );
+
+  // nonce++;
+  // console.log(nonce)
+  // await lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, {
+  //       ...overrides,
+  //       nonce
+  //     });
+
+  // nonce++;
+  // console.log(nonce)
+  // await communityIssuance.setAddresses(lqtyToken.address, stabilityPool.address, {
+  //       ...overrides,
+  //       nonce
+  //     });
+
+  // nonce++;
+  // console.log(nonce)
+  // await unipool.setParams(lqtyToken.address, uniToken.address, 2 * 30 * 24 * 60 * 60, {
+  //       ...overrides,
+  //       nonce
+  //     });
+
 };
 
 const deployMockUniToken = (

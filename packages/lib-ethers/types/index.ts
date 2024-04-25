@@ -14,20 +14,23 @@ import { _TypedLiquityContract, _TypedLogDescription } from "../src/contracts";
 interface ActivePoolCalls {
   NAME(_overrides?: CallOverrides): Promise<string>;
   borrowerOperationsAddress(_overrides?: CallOverrides): Promise<string>;
+  collSurplusPoolAddress(_overrides?: CallOverrides): Promise<string>;
   defaultPoolAddress(_overrides?: CallOverrides): Promise<string>;
   getETH(_overrides?: CallOverrides): Promise<BigNumber>;
   getLUSDDebt(_overrides?: CallOverrides): Promise<BigNumber>;
   isOwner(_overrides?: CallOverrides): Promise<boolean>;
   owner(_overrides?: CallOverrides): Promise<string>;
+  stETHAddress(_overrides?: CallOverrides): Promise<string>;
   stabilityPoolAddress(_overrides?: CallOverrides): Promise<string>;
   troveManagerAddress(_overrides?: CallOverrides): Promise<string>;
 }
 
 interface ActivePoolTransactions {
+  addETH(amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   decreaseLUSDDebt(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   increaseLUSDDebt(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   sendETH(_account: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _stabilityPoolAddress: string, _defaultPoolAddress: string, _overrides?: Overrides): Promise<void>;
+  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _stabilityPoolAddress: string, _defaultPoolAddress: string, _stETHAddress: string, _collSurplusPoolAddress: string, _overrides?: Overrides): Promise<void>;
 }
 
 export interface ActivePool
@@ -80,18 +83,19 @@ interface BorrowerOperationsCalls {
   owner(_overrides?: CallOverrides): Promise<string>;
   priceFeed(_overrides?: CallOverrides): Promise<string>;
   sortedTroves(_overrides?: CallOverrides): Promise<string>;
+  stETHAddress(_overrides?: CallOverrides): Promise<string>;
   troveManager(_overrides?: CallOverrides): Promise<string>;
 }
 
 interface BorrowerOperationsTransactions {
-  addColl(_upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
-  adjustTrove(_maxFeePercentage: BigNumberish, _collWithdrawal: BigNumberish, _LUSDChange: BigNumberish, _isDebtIncrease: boolean, _upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
+  addColl(_upperHint: string, _lowerHint: string, amount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  adjustTrove(_maxFeePercentage: BigNumberish, _collWithdrawal: BigNumberish, _LUSDChange: BigNumberish, _isDebtIncrease: boolean, _upperHint: string, _lowerHint: string, amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   claimCollateral(_overrides?: Overrides): Promise<void>;
   closeTrove(_overrides?: Overrides): Promise<void>;
-  moveETHGainToTrove(_borrower: string, _upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
-  openTrove(_maxFeePercentage: BigNumberish, _LUSDAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
+  moveETHGainToTrove(_borrower: string, _upperHint: string, _lowerHint: string, amount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  openTrove(_maxFeePercentage: BigNumberish, _LUSDAmount: BigNumberish, _upperHint: string, _lowerHint: string, amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   repayLUSD(_LUSDAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: Overrides): Promise<void>;
-  setAddresses(_troveManagerAddress: string, _activePoolAddress: string, _defaultPoolAddress: string, _stabilityPoolAddress: string, _gasPoolAddress: string, _collSurplusPoolAddress: string, _priceFeedAddress: string, _sortedTrovesAddress: string, _lusdTokenAddress: string, _lqtyStakingAddress: string, _overrides?: Overrides): Promise<void>;
+  setAddresses(_troveManagerAddress: string, _activePoolAddress: string, _defaultPoolAddress: string, _stabilityPoolAddress: string, _gasPoolAddress: string, _collSurplusPoolAddress: string, _priceFeedAddress: string, _sortedTrovesAddress: string, _lusdTokenAddress: string, _lqtyStakingAddress: string, _stETHAddress: string, _overrides?: Overrides): Promise<void>;
   withdrawColl(_collWithdrawal: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: Overrides): Promise<void>;
   withdrawLUSD(_maxFeePercentage: BigNumberish, _LUSDAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: Overrides): Promise<void>;
 }
@@ -138,13 +142,15 @@ interface CollSurplusPoolCalls {
   getETH(_overrides?: CallOverrides): Promise<BigNumber>;
   isOwner(_overrides?: CallOverrides): Promise<boolean>;
   owner(_overrides?: CallOverrides): Promise<string>;
+  stETHAddress(_overrides?: CallOverrides): Promise<string>;
   troveManagerAddress(_overrides?: CallOverrides): Promise<string>;
 }
 
 interface CollSurplusPoolTransactions {
   accountSurplus(_account: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  addETH(amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   claimColl(_account: string, _overrides?: Overrides): Promise<void>;
-  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _activePoolAddress: string, _overrides?: Overrides): Promise<void>;
+  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _activePoolAddress: string, _stETHAddress: string, _overrides?: Overrides): Promise<void>;
 }
 
 export interface CollSurplusPool
@@ -206,14 +212,16 @@ interface DefaultPoolCalls {
   getLUSDDebt(_overrides?: CallOverrides): Promise<BigNumber>;
   isOwner(_overrides?: CallOverrides): Promise<boolean>;
   owner(_overrides?: CallOverrides): Promise<string>;
+  stETHAddress(_overrides?: CallOverrides): Promise<string>;
   troveManagerAddress(_overrides?: CallOverrides): Promise<string>;
 }
 
 interface DefaultPoolTransactions {
+  addETH(amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   decreaseLUSDDebt(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   increaseLUSDDebt(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   sendETHToActivePool(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setAddresses(_troveManagerAddress: string, _activePoolAddress: string, _overrides?: Overrides): Promise<void>;
+  setAddresses(_troveManagerAddress: string, _activePoolAddress: string, _stETHAddress: string, _overrides?: Overrides): Promise<void>;
 }
 
 export interface DefaultPool
@@ -436,6 +444,7 @@ interface LQTYStakingCalls {
   lusdToken(_overrides?: CallOverrides): Promise<string>;
   owner(_overrides?: CallOverrides): Promise<string>;
   snapshots(arg0: string, _overrides?: CallOverrides): Promise<{ F_ETH_Snapshot: BigNumber; F_LUSD_Snapshot: BigNumber }>;
+  stETHAddress(_overrides?: CallOverrides): Promise<string>;
   stakes(arg0: string, _overrides?: CallOverrides): Promise<BigNumber>;
   totalLQTYStaked(_overrides?: CallOverrides): Promise<BigNumber>;
   troveManagerAddress(_overrides?: CallOverrides): Promise<string>;
@@ -444,7 +453,7 @@ interface LQTYStakingCalls {
 interface LQTYStakingTransactions {
   increaseF_ETH(_ETHFee: BigNumberish, _overrides?: Overrides): Promise<void>;
   increaseF_LUSD(_LUSDFee: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setAddresses(_lqtyTokenAddress: string, _lusdTokenAddress: string, _troveManagerAddress: string, _borrowerOperationsAddress: string, _activePoolAddress: string, _overrides?: Overrides): Promise<void>;
+  setAddresses(_lqtyTokenAddress: string, _lusdTokenAddress: string, _troveManagerAddress: string, _borrowerOperationsAddress: string, _activePoolAddress: string, _stETHAddress: string, _overrides?: Overrides): Promise<void>;
   stake(_LQTYamount: BigNumberish, _overrides?: Overrides): Promise<void>;
   unstake(_LQTYamount: BigNumberish, _overrides?: Overrides): Promise<void>;
 }
@@ -684,10 +693,11 @@ interface StabilityPoolCalls {
 }
 
 interface StabilityPoolTransactions {
+  addETH(amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   offset(_debtToOffset: BigNumberish, _collToAdd: BigNumberish, _overrides?: Overrides): Promise<void>;
   provideToSP(_amount: BigNumberish, _frontEndTag: string, _overrides?: Overrides): Promise<void>;
   registerFrontEnd(_kickbackRate: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _activePoolAddress: string, _lusdTokenAddress: string, _sortedTrovesAddress: string, _priceFeedAddress: string, _communityIssuanceAddress: string, _overrides?: Overrides): Promise<void>;
+  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _activePoolAddress: string, _lusdTokenAddress: string, _sortedTrovesAddress: string, _priceFeedAddress: string, _communityIssuanceAddress: string, _stETHAddress: string, _overrides?: Overrides): Promise<void>;
   withdrawETHGainToTrove(_upperHint: string, _lowerHint: string, _overrides?: Overrides): Promise<void>;
   withdrawFromSP(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
 }

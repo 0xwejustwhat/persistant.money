@@ -853,7 +853,8 @@ export class PopulatableEthersLiquity
       maxBorrowingRate.hex,
       borrowLUSD.hex,
       ...hints,
-      { value: depositCollateral.hex, ...overrides }
+      depositCollateral.hex,
+      {...overrides }
     ];
 
     let gasHeadroom: number | undefined;
@@ -987,7 +988,8 @@ export class PopulatableEthersLiquity
       (borrowLUSD ?? repayLUSD ?? Decimal.ZERO).hex,
       !!borrowLUSD,
       ...hints,
-      { value: depositCollateral?.hex, ...overrides }
+      BigNumber.from(depositCollateral),
+      {...overrides }
     ];
 
     let gasHeadroom: number | undefined;

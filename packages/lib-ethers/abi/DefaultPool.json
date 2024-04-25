@@ -171,6 +171,19 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "addETH",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "_amount",
         "type": "uint256"
       }
@@ -269,11 +282,29 @@
         "internalType": "address",
         "name": "_activePoolAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_stETHAddress",
+        "type": "address"
       }
     ],
     "name": "setAddresses",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stETHAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -288,9 +319,5 @@
     ],
     "stateMutability": "view",
     "type": "function"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "receive"
   }
 ]

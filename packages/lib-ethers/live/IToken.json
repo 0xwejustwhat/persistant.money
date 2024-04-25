@@ -1,32 +1,31 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "ICollSurplusPool",
-  "sourceName": "contracts/Interfaces/ICollSurplusPool.sol",
+  "contractName": "IToken",
+  "sourceName": "contracts/Token.sol",
   "abi": [
     {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": false,
+          "indexed": true,
           "internalType": "address",
-          "name": "_newActivePoolAddress",
+          "name": "_owner",
           "type": "address"
-        }
-      ],
-      "name": "ActivePoolAddressChanged",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_spender",
+          "type": "address"
+        },
         {
           "indexed": false,
-          "internalType": "address",
-          "name": "_newBorrowerOperationsAddress",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
         }
       ],
-      "name": "BorrowerOperationsAddressChanged",
+      "name": "Approval",
       "type": "event"
     },
     {
@@ -35,24 +34,11 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "_account",
+          "name": "_from",
           "type": "address"
         },
         {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "_newBalance",
-          "type": "uint256"
-        }
-      ],
-      "name": "CollBalanceUpdated",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
+          "indexed": true,
           "internalType": "address",
           "name": "_to",
           "type": "address"
@@ -60,96 +46,31 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "_amount",
+          "name": "_value",
           "type": "uint256"
         }
       ],
-      "name": "EtherSent",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "_newTroveManagerAddress",
-          "type": "address"
-        }
-      ],
-      "name": "TroveManagerAddressChanged",
+      "name": "Transfer",
       "type": "event"
     },
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "_account",
+          "name": "_owner",
           "type": "address"
         },
         {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "accountSurplus",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "addETH",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
-          "name": "_account",
+          "name": "_spender",
           "type": "address"
         }
       ],
-      "name": "claimColl",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_account",
-          "type": "address"
-        }
-      ],
-      "name": "getCollateral",
+      "name": "allowance",
       "outputs": [
         {
           "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getETH",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
+          "name": "remaining",
           "type": "uint256"
         }
       ],
@@ -160,27 +81,95 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_borrowerOperationsAddress",
+          "name": "_spender",
           "type": "address"
         },
         {
-          "internalType": "address",
-          "name": "_troveManagerAddress",
-          "type": "address"
-        },
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
         {
           "internalType": "address",
-          "name": "_activePoolAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_stETHAddress",
+          "name": "_owner",
           "type": "address"
         }
       ],
-      "name": "setAddresses",
-      "outputs": [],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "success",
+          "type": "bool"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     }

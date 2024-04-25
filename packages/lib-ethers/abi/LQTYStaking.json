@@ -430,6 +430,11 @@
         "internalType": "address",
         "name": "_activePoolAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_stETHAddress",
+        "type": "address"
       }
     ],
     "name": "setAddresses",
@@ -456,6 +461,19 @@
         "internalType": "uint256",
         "name": "F_LUSD_Snapshot",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stETHAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

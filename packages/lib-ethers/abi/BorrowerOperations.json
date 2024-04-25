@@ -364,11 +364,16 @@
         "internalType": "address",
         "name": "_lowerHint",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "addColl",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -402,11 +407,16 @@
         "internalType": "address",
         "name": "_lowerHint",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "adjustTrove",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -549,11 +559,16 @@
         "internalType": "address",
         "name": "_lowerHint",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "moveETHGainToTrove",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -577,11 +592,16 @@
         "internalType": "address",
         "name": "_lowerHint",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
     "name": "openTrove",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -684,6 +704,11 @@
         "internalType": "address",
         "name": "_lqtyStakingAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_stETHAddress",
+        "type": "address"
       }
     ],
     "name": "setAddresses",
@@ -697,6 +722,19 @@
     "outputs": [
       {
         "internalType": "contract ISortedTroves",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stETHAddress",
+    "outputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
