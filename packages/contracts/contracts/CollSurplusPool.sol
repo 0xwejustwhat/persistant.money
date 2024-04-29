@@ -84,7 +84,6 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         emit CollBalanceUpdated(_account, newAmount);
     }
 
-    // To Change
     function claimColl(address _account) external override {
         _requireCallerIsBorrowerOperations();
         uint claimableColl = balances[_account];

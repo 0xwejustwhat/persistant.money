@@ -92,7 +92,6 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     // --- Pool functionality ---
 
-    // To Change
     function sendETH(address _account, uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
         ETH = ETH.sub(_amount);
@@ -108,6 +107,12 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         } else if (_account == stabilityPoolAddress) {
             IStabilityPool(_account).addETH(_amount);
         }
+    }
+
+    function addETH(uint amount) external override {
+        _requireCallerIsBorrowerOperationsOrDefaultPool();
+        ETH = ETH.add(amount);
+        emit ActivePoolETHBalanceUpdated(ETH);
     }
 
     function increaseLUSDDebt(uint _amount) external override {
@@ -146,12 +151,4 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
             "ActivePool: Caller is neither BorrowerOperations nor TroveManager");
     }
 
-    // --- Fallback function ---
-
-    // To Change
-    function addETH(uint amount) external override {
-        _requireCallerIsBorrowerOperationsOrDefaultPool();
-        ETH = ETH.add(amount);
-        emit ActivePoolETHBalanceUpdated(ETH);
-    }
 }

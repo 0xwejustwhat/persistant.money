@@ -996,7 +996,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     // --- Fallback function ---
 
-    // To Change
     function addETH(uint amount) external override {
         _requireCallerIsActivePool();
         ETH = ETH.add(amount);

@@ -1,7 +1,10 @@
 const deploymentHelper = require("../utils/deploymentHelpers.js")
 const testHelpers = require("../utils/testHelpers.js")
+const stETHAllocator = require("../utils/AllocateSTETH.js")
 const th = testHelpers.TestHelper
+const allocator = stETHAllocator.Allocator
 const dec = th.dec
+const _100pct = th._100pct
 
 const randAmountInWei = th.randAmountInWei
 //const randAmountInGwei = th.randAmountInGwei
@@ -10,6 +13,7 @@ const ZERO_ADDRESS = th.ZERO_ADDRESS
 
 contract('TroveManager', async accounts => {
   
+  const multisigAddress = accounts[997]
   const bountyAddress = accounts[998]
   const lpRewardsAddress = accounts[999]
 
@@ -23,7 +27,9 @@ contract('TroveManager', async accounts => {
   
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress)
+    await allocator.allocate(contracts, accounts.slice(0, 100))
+    await allocator.allocate(contracts, accounts.slice(997, 1000))
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisigAddress)
     
     lusdToken = contracts.lusdToken
     priceFeed = contracts.priceFeedTestnet
@@ -47,20 +53,20 @@ contract('TroveManager', async accounts => {
   // --- Check accumulation from repeatedly applying rewards ---
 
   it("11 accounts with random coll. 1 liquidation. 10 accounts do Trove operations (apply rewards)", async () => {
-    await borrowerOperations.openTrove(0, 0, accounts[99], { from: accounts[99], value: dec(100, 'ether') })
-    await borrowerOperations.openTrove(0, dec(170, 18), accounts[0], { from: accounts[0], value: dec(1, 'ether') })
+    await borrowerOperations.openTrove(_100pct, dec(2000, 18), accounts[99], accounts[99], dec(100, 'ether'), { from: accounts[99] })
+    await borrowerOperations.openTrove(_100pct, dec(2000, 18), accounts[0], accounts[0], dec(20, 'ether'), { from: accounts[0] })
 
-    await th.openTrove_allAccounts_randomETH(1, 2, accounts.slice(1, 10), contracts, dec(170, 18))
+    await th.openTrove_allAccounts_randomETH(100, 200, accounts.slice(1, 10), contracts, dec(2000, 18))
 
     await priceFeed.setPrice(dec(100, 18))
 
     await troveManager.liquidate(accounts[0])
 
     for (account of accounts.slice(1, 10)) {
-      borrowerOperations.addColl(account, account, { from: account, value: 1 })
+      borrowerOperations.addColl(account, account, 1, { from: account })
     }
 
-    await borrowerOperations.addColl(accounts[99], accounts[99], { from: accounts[99], value: 1 })
+    await borrowerOperations.addColl(accounts[99], accounts[99], 1, { from: accounts[99] })
     
     // check DefaultPool
     const ETH_DefaultPool = await defaultPool.getETH()
