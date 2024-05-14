@@ -6,7 +6,7 @@ const { toBN, dec, ZERO_ADDRESS } = th
 const allocator = stETHAllocator.Allocator
 
 const TroveManagerTester = artifacts.require("./TroveManagerTester")
-const LUSDToken = artifacts.require("./LUSDToken.sol")
+const ANTUSDToken = artifacts.require("./ANTUSDToken.sol")
 
 contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async accounts => {
   const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
@@ -28,7 +28,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.lusdToken = await LUSDToken.new(
+    contracts.lusdToken = await ANTUSDToken.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
@@ -55,7 +55,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
 
       const totalLiquidatedDebt = A_totalDebt.add(B_totalDebt).add(C_totalDebt)
 
-      await openTrove({ ICR: toBN(dec(340, 16)), extraLUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
+      await openTrove({ ICR: toBN(dec(340, 16)), extraANTUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
       await stabilityPool.provideToSP(totalLiquidatedDebt, ZERO_ADDRESS, { from: whale })
 
       // Price drops
@@ -119,7 +119,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
       } = await setup()
 
       const spEthBefore = await stabilityPool.getETH()
-      const spLusdBefore = await stabilityPool.getTotalLUSDDeposits()
+      const spLusdBefore = await stabilityPool.getTotalANTUSDDeposits()
 
       const tx = await troveManager.batchLiquidateTroves([alice, carol])
 
@@ -132,18 +132,18 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
       assert.equal((await troveManager.Troves(carol))[3], '3')
 
       const spEthAfter = await stabilityPool.getETH()
-      const spLusdAfter = await stabilityPool.getTotalLUSDDeposits()
+      const spLusdAfter = await stabilityPool.getTotalANTUSDDeposits()
 
       // liquidate collaterals with the gas compensation fee subtracted
       const expectedCollateralLiquidatedA = th.applyLiquidationFee(A_totalDebt.mul(mv._MCR).div(price))
       const expectedCollateralLiquidatedC = th.applyLiquidationFee(C_coll)
       // Stability Pool gains
-      const expectedGainInLUSD = expectedCollateralLiquidatedA.mul(price).div(mv._1e18BN).sub(A_totalDebt)
-      const realGainInLUSD = spEthAfter.sub(spEthBefore).mul(price).div(mv._1e18BN).sub(spLusdBefore.sub(spLusdAfter))
+      const expectedGainInANTUSD = expectedCollateralLiquidatedA.mul(price).div(mv._1e18BN).sub(A_totalDebt)
+      const realGainInANTUSD = spEthAfter.sub(spEthBefore).mul(price).div(mv._1e18BN).sub(spLusdBefore.sub(spLusdAfter))
 
       assert.equal(spEthAfter.sub(spEthBefore).toString(), expectedCollateralLiquidatedA.toString(), 'Stability Pool ETH doesn’t match')
-      assert.equal(spLusdBefore.sub(spLusdAfter).toString(), A_totalDebt.toString(), 'Stability Pool LUSD doesn’t match')
-      assert.equal(realGainInLUSD.toString(), expectedGainInLUSD.toString(), 'Stability Pool gains don’t match')
+      assert.equal(spLusdBefore.sub(spLusdAfter).toString(), A_totalDebt.toString(), 'Stability Pool ANTUSD doesn’t match')
+      assert.equal(realGainInANTUSD.toString(), expectedGainInANTUSD.toString(), 'Stability Pool gains don’t match')
     })
 
     it('A trove over TCR is not liquidated', async () => {
@@ -153,7 +153,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
 
       const totalLiquidatedDebt = A_totalDebt.add(B_totalDebt).add(C_totalDebt)
 
-      await openTrove({ ICR: toBN(dec(310, 16)), extraLUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
+      await openTrove({ ICR: toBN(dec(310, 16)), extraANTUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
       await stabilityPool.provideToSP(totalLiquidatedDebt, ZERO_ADDRESS, { from: whale })
 
       // Price drops
@@ -198,7 +198,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
 
       const totalLiquidatedDebt = A_totalDebt.add(B_totalDebt)
 
-      await openTrove({ ICR: toBN(dec(300, 16)), extraLUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
+      await openTrove({ ICR: toBN(dec(300, 16)), extraANTUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
       await stabilityPool.provideToSP(totalLiquidatedDebt, ZERO_ADDRESS, { from: whale })
 
       // Price drops

@@ -11,10 +11,10 @@ import "./Dependencies/console.sol";
 import "./Dependencies/IERC20.sol";
 
 /*
- * The Default Pool holds the ETH and LUSD debt (but not LUSD tokens) from liquidations that have been redistributed
+ * The Default Pool holds the ETH and ANTUSD debt (but not ANTUSD tokens) from liquidations that have been redistributed
  * to active troves but not yet "applied", i.e. not yet recorded on a recipient active trove's struct.
  *
- * When a trove makes an operation that applies its pending ETH and LUSD debt, its pending ETH and LUSD debt is moved
+ * When a trove makes an operation that applies its pending ETH and ANTUSD debt, its pending ETH and ANTUSD debt is moved
  * from the Default Pool to the Active Pool.
  */
 contract DefaultPool is Ownable, CheckContract, IDefaultPool {
@@ -25,11 +25,12 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     address public troveManagerAddress;
     address public activePoolAddress;
     address public stETHAddress;
+    address public rewardPoolAddress;
     uint256 internal ETH;  // deposited ETH tracker
-    uint256 internal LUSDDebt;  // debt
+    uint256 internal Debt;  // debt
 
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event DefaultPoolLUSDDebtUpdated(uint _LUSDDebt);
+    event DefaultPoolDebtUpdated(uint _Debt);
     event DefaultPoolETHBalanceUpdated(uint _ETH);
 
     // --- Dependency setters ---
@@ -37,7 +38,8 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     function setAddresses(
         address _troveManagerAddress,
         address _activePoolAddress,
-        address _stETHAddress
+        address _stETHAddress, 
+        address _rewardPoolAddress
     )
         external
         onlyOwner
@@ -46,9 +48,11 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         checkContract(_activePoolAddress);
         checkContract(_stETHAddress);
 
+
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
         stETHAddress = _stETHAddress;
+        rewardPoolAddress = _rewardPoolAddress;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -67,8 +71,8 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         return ETH;
     }
 
-    function getLUSDDebt() external view override returns (uint) {
-        return LUSDDebt;
+    function getANTUSDDebt() external view override returns (uint) {
+        return Debt;
     }
 
     // --- Pool functionality ---
@@ -84,16 +88,16 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         IActivePool(activePool).addETH(_amount);
     }
 
-    function increaseLUSDDebt(uint _amount) external override {
+    function increaseANTUSDDebt(uint _amount) external override {
         _requireCallerIsTroveManager();
-        LUSDDebt = LUSDDebt.add(_amount);
-        emit DefaultPoolLUSDDebtUpdated(LUSDDebt);
+        Debt = Debt.add(_amount);
+        emit DefaultPoolDebtUpdated(Debt);
     }
 
-    function decreaseLUSDDebt(uint _amount) external override {
+    function decreaseANTUSDDebt(uint _amount) external override {
         _requireCallerIsTroveManager();
-        LUSDDebt = LUSDDebt.sub(_amount);
-        emit DefaultPoolLUSDDebtUpdated(LUSDDebt);
+        Debt = Debt.sub(_amount);
+        emit DefaultPoolDebtUpdated(Debt);
     }
 
     // --- 'require' functions ---
@@ -108,10 +112,14 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     // --- Fallback function ---
 
-    // To Change
     function addETH(uint amount) external override{
         _requireCallerIsActivePool();
         ETH = ETH.add(amount);
         emit DefaultPoolETHBalanceUpdated(ETH);
+    }
+
+    function withdrawReward() external {
+        uint reward = IERC20(stETHAddress).balanceOf(address(this)) - ETH;
+        IERC20(stETHAddress).transfer(rewardPoolAddress, reward); 
     }
 }

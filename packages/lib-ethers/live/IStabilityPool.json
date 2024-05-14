@@ -445,19 +445,6 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "addETH",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "_frontEnd",
           "type": "address"
@@ -660,11 +647,6 @@
         {
           "internalType": "address",
           "name": "_communityIssuanceAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_stETHAddress",
           "type": "address"
         }
       ],

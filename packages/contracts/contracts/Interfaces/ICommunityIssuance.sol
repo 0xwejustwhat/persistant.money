@@ -6,15 +6,15 @@ interface ICommunityIssuance {
     
     // --- Events ---
     
-    event LQTYTokenAddressSet(address _lqtyTokenAddress);
+    event ANTMTokenAddressSet(address _antmTokenAddress);
     event StabilityPoolAddressSet(address _stabilityPoolAddress);
-    event TotalLQTYIssuedUpdated(uint _totalLQTYIssued);
+    event TotalANTMIssuedUpdated(uint _totalANTMIssued);
 
     // --- Functions ---
 
-    function setAddresses(address _lqtyTokenAddress, address _stabilityPoolAddress) external;
+    function setAddresses(address _antmTokenAddress, address _stabilityPoolAddress) external;
 
-    function issueLQTY() external returns (uint);
+    function issueANTM() external returns (uint);
 
-    function sendLQTY(address _account, uint _LQTYamount) external;
+    function sendANTM(address _account, uint _ANTMamount) external;
 }

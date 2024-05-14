@@ -18,9 +18,9 @@ interface IPool {
     
     function getETH() external view returns (uint);
 
-    function getLUSDDebt() external view returns (uint);
+    function getANTUSDDebt() external view returns (uint);
 
-    function increaseLUSDDebt(uint _amount) external;
+    function increaseANTUSDDebt(uint _amount) external;
 
-    function decreaseLUSDDebt(uint _amount) external;
+    function decreaseANTUSDDebt(uint _amount) external;
 }

@@ -20,7 +20,8 @@ interface ICollSurplusPool {
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
         address _activePoolAddress,
-        address _stETHAddress
+        address _stETHAddress, 
+        address _rewarPoolAddress
     ) external;
 
     function getETH() external view returns (uint);

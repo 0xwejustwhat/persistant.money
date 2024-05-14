@@ -30,14 +30,15 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     address public defaultPoolAddress;
     address public stETHAddress;
     address public collSurplusPoolAddress;
+    address public rewardPoolAddress;
     uint256 internal ETH;  // deposited ether tracker
-    uint256 internal LUSDDebt;
+    uint256 internal Debt;
 
     // --- Events ---
 
     event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolLUSDDebtUpdated(uint _LUSDDebt);
+    event ActivePoolDebtUpdated(uint _Debt);
     event ActivePoolETHBalanceUpdated(uint _ETH);
 
     // --- Contract setters ---
@@ -48,7 +49,8 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         address _stabilityPoolAddress,
         address _defaultPoolAddress,
         address _stETHAddress,
-        address _collSurplusPoolAddress
+        address _collSurplusPoolAddress, 
+        address _rewardPoolAddress
     )
         external
         onlyOwner
@@ -66,6 +68,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         defaultPoolAddress = _defaultPoolAddress;
         stETHAddress = _stETHAddress;
         collSurplusPoolAddress = _collSurplusPoolAddress;
+        rewardPoolAddress = _rewardPoolAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -86,8 +89,8 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         return ETH;
     }
 
-    function getLUSDDebt() external view override returns (uint) {
-        return LUSDDebt;
+    function getANTUSDDebt() external view override returns (uint) {
+        return Debt;
     }
 
     // --- Pool functionality ---
@@ -115,16 +118,21 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         emit ActivePoolETHBalanceUpdated(ETH);
     }
 
-    function increaseLUSDDebt(uint _amount) external override {
+    function increaseANTUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveM();
-        LUSDDebt  = LUSDDebt.add(_amount);
-        ActivePoolLUSDDebtUpdated(LUSDDebt);
+        Debt  = Debt.add(_amount);
+        ActivePoolDebtUpdated(Debt);
     }
 
-    function decreaseLUSDDebt(uint _amount) external override {
+    function decreaseANTUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
-        LUSDDebt = LUSDDebt.sub(_amount);
-        ActivePoolLUSDDebtUpdated(LUSDDebt);
+        Debt = Debt.sub(_amount);
+        ActivePoolDebtUpdated(Debt);
+    }
+
+    function withdrawReward() external {
+        uint reward = IERC20(stETHAddress).balanceOf(address(this)) - ETH;
+        IERC20(stETHAddress).transfer(rewardPoolAddress, reward); 
     }
 
     // --- 'require' functions ---

@@ -19,10 +19,10 @@ contract BorrowerOperationsScript is CheckContract {
         stETHAddress = _stETHAddress;
     }
 
-    function openTrove(uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint, uint amount) external {
+    function openTrove(uint _maxFee, uint _ANTUSDAmount, address _upperHint, address _lowerHint, uint amount) external {
         IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
         IERC20(stETHAddress).approve(address(borrowerOperations), amount);
-        borrowerOperations.openTrove(_maxFee, _LUSDAmount, _upperHint, _lowerHint, amount);
+        borrowerOperations.openTrove(_maxFee, _ANTUSDAmount, _upperHint, _lowerHint, amount);
     }
 
     function addColl(address _upperHint, address _lowerHint, uint amount) external {
@@ -35,12 +35,12 @@ contract BorrowerOperationsScript is CheckContract {
         borrowerOperations.withdrawColl(_amount, _upperHint, _lowerHint);
     }
 
-    function withdrawLUSD(uint _maxFee, uint _amount, address _upperHint, address _lowerHint) external {
-        borrowerOperations.withdrawLUSD(_maxFee, _amount, _upperHint, _lowerHint);
+    function withdrawANTUSD(uint _maxFee, uint _amount, address _upperHint, address _lowerHint) external {
+        borrowerOperations.withdrawANTUSD(_maxFee, _amount, _upperHint, _lowerHint);
     }
 
-    function repayLUSD(uint _amount, address _upperHint, address _lowerHint) external {
-        borrowerOperations.repayLUSD(_amount, _upperHint, _lowerHint);
+    function repayANTUSD(uint _amount, address _upperHint, address _lowerHint) external {
+        borrowerOperations.repayANTUSD(_amount, _upperHint, _lowerHint);
     }
 
     function closeTrove() external {

@@ -24,7 +24,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
     ITroveManager immutable troveManager;
     IStabilityPool immutable stabilityPool;
     IPriceFeed immutable priceFeed;
-    IERC20 immutable lusdToken;
+    IERC20 immutable antusdToken;
     IERC20 immutable lqtyToken;
     ILQTYStaking immutable lqtyStaking;
 
@@ -51,9 +51,9 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         checkContract(address(priceFeedCached));
         priceFeed = priceFeedCached;
 
-        address lusdTokenCached = address(troveManagerCached.lusdToken());
-        checkContract(lusdTokenCached);
-        lusdToken = IERC20(lusdTokenCached);
+        address antusdTokenCached = address(troveManagerCached.antusdToken());
+        checkContract(antusdTokenCached);
+        antusdToken = IERC20(antusdTokenCached);
 
         address lqtyTokenCached = address(troveManagerCached.lqtyToken());
         checkContract(lqtyTokenCached);
@@ -64,7 +64,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         lqtyStaking = lqtyStakingCached;
     }
 
-    function claimCollateralAndOpenTrove(uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint, uint amount) external {
+    function claimCollateralAndOpenTrove(uint _maxFee, uint _ANTUSDAmount, address _upperHint, address _lowerHint, uint amount) external {
 
         IERC20(stETHAddress).transferFrom(msg.sender, address(this), amount);
 
@@ -84,7 +84,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         uint totalCollateral = balanceAfter.sub(balanceBefore).add(amount);
 
         // Open trove with obtained collateral, plus collateral sent by user
-        borrowerOperations.openTrove(_maxFee, _LUSDAmount, _upperHint, _lowerHint, totalCollateral);
+        borrowerOperations.openTrove(_maxFee, _ANTUSDAmount, _upperHint, _lowerHint, totalCollateral);
     }
 
     function claimSPRewardsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
@@ -98,14 +98,14 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
         uint claimedCollateral = collBalanceAfter.sub(collBalanceBefore);
 
-        // Add claimed ETH to trove, get more LUSD and stake it into the Stability Pool
+        // Add claimed ETH to trove, get more ANTUSD and stake it into the Stability Pool
         if (claimedCollateral > 0) {
             _requireUserHasTrove(address(this));
-            uint LUSDAmount = _getNetLUSDAmount(claimedCollateral);
-            borrowerOperations.adjustTrove(_maxFee, 0, LUSDAmount, true, _upperHint, _lowerHint, claimedCollateral);
-            // Provide withdrawn LUSD to Stability Pool
-            if (LUSDAmount > 0) {
-                stabilityPool.provideToSP(LUSDAmount, address(0));
+            uint ANTUSDAmount = _getNetANTUSDAmount(claimedCollateral);
+            borrowerOperations.adjustTrove(_maxFee, 0, ANTUSDAmount, true, _upperHint, _lowerHint, claimedCollateral);
+            // Provide withdrawn ANTUSD to Stability Pool
+            if (ANTUSDAmount > 0) {
+                stabilityPool.provideToSP(ANTUSDAmount, address(0));
             }
         }
 
@@ -118,27 +118,27 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
 
     function claimStakingGainsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
         uint collBalanceBefore = IERC20(stETHAddress).balanceOf(address(this));
-        uint lusdBalanceBefore = lusdToken.balanceOf(address(this));
+        uint antusdBalanceBefore = antusdToken.balanceOf(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
 
         // Claim gains
         lqtyStaking.unstake(0);
 
         uint gainedCollateral = IERC20(stETHAddress).balanceOf(address(this)).sub(collBalanceBefore); // stack too deep issues :'(
-        uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(lusdBalanceBefore);
+        uint gainedANTUSD = antusdToken.balanceOf(address(this)).sub(antusdBalanceBefore);
 
-        uint netLUSDAmount;
-        // Top up trove and get more LUSD, keeping ICR constant
+        uint netANTUSDAmount;
+        // Top up trove and get more ANTUSD, keeping ICR constant
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this));
-            netLUSDAmount = _getNetLUSDAmount(gainedCollateral);
+            netANTUSDAmount = _getNetANTUSDAmount(gainedCollateral);
             IERC20(stETHAddress).approve(address(borrowerOperations), gainedCollateral);
-            borrowerOperations.adjustTrove(_maxFee, 0, netLUSDAmount, true, _upperHint, _lowerHint, gainedCollateral);
+            borrowerOperations.adjustTrove(_maxFee, 0, netANTUSDAmount, true, _upperHint, _lowerHint, gainedCollateral);
         }
 
-        uint totalLUSD = gainedLUSD.add(netLUSDAmount);
-        if (totalLUSD > 0) {
-            stabilityPool.provideToSP(totalLUSD, address(0));
+        uint totalANTUSD = gainedANTUSD.add(netANTUSDAmount);
+        if (totalANTUSD > 0) {
+            stabilityPool.provideToSP(totalANTUSD, address(0));
 
             // Providing to Stability Pool also triggers LQTY claim, so stake it if any
             uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
@@ -150,13 +150,13 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
 
     }
 
-    function _getNetLUSDAmount(uint _collateral) internal returns (uint) {
+    function _getNetANTUSDAmount(uint _collateral) internal returns (uint) {
         uint price = priceFeed.fetchPrice();
         uint ICR = troveManager.getCurrentICR(address(this), price);
 
-        uint LUSDAmount = _collateral.mul(price).div(ICR);
+        uint ANTUSDAmount = _collateral.mul(price).div(ICR);
         uint borrowingRate = troveManager.getBorrowingRateWithDecay();
-        uint netDebt = LUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(LiquityMath.DECIMAL_PRECISION.add(borrowingRate));
+        uint netDebt = ANTUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(LiquityMath.DECIMAL_PRECISION.add(borrowingRate));
 
         return netDebt;
     }

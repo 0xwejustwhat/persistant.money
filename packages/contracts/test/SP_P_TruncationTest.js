@@ -11,7 +11,7 @@ const toBN = th.toBN
 const getDifference = th.getDifference
 
 const TroveManagerTester = artifacts.require("TroveManagerTester")
-const LUSDToken = artifacts.require("LUSDToken")
+const ANTUSDToken = artifacts.require("ANTUSDToken")
 
 const GAS_PRICE = 10000000
 
@@ -35,16 +35,16 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
 
   const ZERO_ADDRESS = th.ZERO_ADDRESS
 
-  const getOpenTroveLUSDAmount = async (totalDebt) => th.getOpenTroveLUSDAmount(contracts, totalDebt)
+  const getOpenTroveANTUSDAmount = async (totalDebt) => th.getOpenTroveANTUSDAmount(contracts, totalDebt)
   const openTrove = async (params) => th.openTrove(contracts, params)
-  const getLUSDAmountForDesiredDebt = async (desiredDebt) => (await getOpenTroveLUSDAmount(dec(desiredDebt, 18))).add(th.toBN(1))
+  const getANTUSDAmountForDesiredDebt = async (desiredDebt) => (await getOpenTroveANTUSDAmount(dec(desiredDebt, 18))).add(th.toBN(1))
 
 
   describe("Scale Factor issue tests", async () => {
     beforeEach(async () => {
       contracts = await deploymentHelper.deployLiquityCore()
       contracts.troveManager = await TroveManagerTester.new()
-      contracts.lusdToken = await LUSDToken.new(
+      contracts.lusdToken = await ANTUSDToken.new(
         contracts.troveManager.address,
         contracts.stabilityPool.address,
         contracts.borrowerOperations.address
@@ -80,13 +80,13 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     })
  
   it("1. Liquidation succeeds after P reduced to 1", async () => {
-    // Whale opens Trove with 100k ETH and sends 50k LUSD to A
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
+    // Whale opens Trove with 100k ETH and sends 50k ANTUSD to A
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
     await lusdToken.transfer(A, dec(50000, 18), {from: whale})
 
-    // Open 3 Troves with 2000 LUSD debt
+    // Open 3 Troves with 2000 ANTUSD debt
     for (account of [A, B, C]) {
-      await borrowerOperations.openTrove(th._100pct, await getLUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
+      await borrowerOperations.openTrove(th._100pct, await getANTUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
       assert.isTrue((await th.getTroveEntireDebt(contracts, account)).eq(th.toBN(dec(2000, 18))))
     }
 
@@ -108,7 +108,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(P_1, dec(1, 9))
     
     // A re-fills SP back up to deposit 0 level, i.e. just enough to reduce P by 1e9 from a 2k debt liq.
-    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_1, ZERO_ADDRESS, {from: A})
 
      // Price drop -> liquidate Trove B -> price rises 
@@ -122,7 +122,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.isTrue(P_2.eq(th.toBN(1)))
 
     // A re-fills SP to same pre-liq level again
-    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_2, ZERO_ADDRESS, {from: A})
 
     // Price drop -> liquidate Trove C -> price rises 
@@ -135,13 +135,13 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
   })
 
   it("2. New deposits can be made after P reduced to 1", async () => {
-    // Whale opens Trove with 100k ETH and sends 50k LUSD to A
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
+    // Whale opens Trove with 100k ETH and sends 50k ANTUSD to A
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
     await lusdToken.transfer(A, dec(50000, 18), {from: whale})
 
-    // Open 3 Troves with 2000 LUSD debt
+    // Open 3 Troves with 2000 ANTUSD debt
     for (account of [A, B, C]) {
-      await borrowerOperations.openTrove(th._100pct, await getLUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
+      await borrowerOperations.openTrove(th._100pct, await getANTUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
       assert.isTrue((await th.getTroveEntireDebt(contracts, account)).eq(th.toBN(dec(2000, 18))))
     }
 
@@ -163,7 +163,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(P_1, dec(1, 9))
     
     // A re-fills SP back up to deposit 0 level, i.e. just enough to reduce P by 1e9 from a 2k debt liq.
-    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_1, ZERO_ADDRESS, {from: A})
 
      // Price drop -> liquidate Trove B -> price rises 
@@ -177,10 +177,10 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(P_2, dec(1,0))
 
     // A re-fills SP to same pre-liq level again
-    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_2, ZERO_ADDRESS, {from: A})
 
-    // Whale gives LUSD to D,E,F
+    // Whale gives ANTUSD to D,E,F
     const newDeposits =  [th.toBN(1), th.toBN(dec(10000, 18)), th.toBN(dec(20000, 18))]
     const newDepositors = [D,E,F]
     const frontEnds = [ZERO_ADDRESS, F1, F2]
@@ -188,18 +188,18 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     for (let i=0; i < 3; i ++) {
       await lusdToken.transfer(newDepositors[i], newDeposits[i], {from: whale})
       await stabilityPool.provideToSP(newDeposits[i], frontEnds[i], {from: newDepositors[i]})
-      assert.isTrue((await stabilityPool.getCompoundedLUSDDeposit(newDepositors[i])).eq(newDeposits[i]))
+      assert.isTrue((await stabilityPool.getCompoundedANTUSDDeposit(newDepositors[i])).eq(newDeposits[i]))
     }
   })
 
   it("3. Liquidation succeeds when P == 1 and liquidation has newProductFactor == 1e9", async () => {
-    // Whale opens Trove with 100k ETH and sends 50k LUSD to A
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
+    // Whale opens Trove with 100k ETH and sends 50k ANTUSD to A
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
     await lusdToken.transfer(A, dec(50000, 18), {from: whale})
 
-    // Open 3 Troves with 2000 LUSD debt
+    // Open 3 Troves with 2000 ANTUSD debt
     for (account of [A, B, C]) {
-      await borrowerOperations.openTrove(th._100pct, await getLUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
+      await borrowerOperations.openTrove(th._100pct, await getANTUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
       assert.isTrue((await th.getTroveEntireDebt(contracts, account)).eq(th.toBN(dec(2000, 18))))
     }
 
@@ -225,7 +225,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(scale, "1")
     
     // A re-fills SP back up to deposit 0 level, i.e. just enough to reduce P by 1e9 from a 2k debt liq.
-    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_1, ZERO_ADDRESS, {from: A})
 
      // Price drop -> liquidate Trove B -> price rises 
@@ -242,7 +242,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
 
     // A re-fills SP to ~1.000000001x pre-liq level, i.e. to trigger a newProductFactor == 1e9, 
     // (and trigger scale change)
-    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits()).add(th.toBN(dec(2,12)))
+    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits()).add(th.toBN(dec(2,12)))
     await stabilityPool.provideToSP(deposit_2, ZERO_ADDRESS, {from: A})
 
     // Price drop -> liquidate Trove C -> price rises 
@@ -260,13 +260,13 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
   })
 
   it("4. Liquidation succeeds when P == 1 and liquidation has newProductFactor > 1e9", async () => {
-    // Whale opens Trove with 100k ETH and sends 50k LUSD to A
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
+    // Whale opens Trove with 100k ETH and sends 50k ANTUSD to A
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
     await lusdToken.transfer(A, dec(50000, 18), {from: whale})
 
-    // Open 3 Troves with 2000 LUSD debt
+    // Open 3 Troves with 2000 ANTUSD debt
     for (account of [A, B, C]) {
-      await borrowerOperations.openTrove(th._100pct, await getLUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
+      await borrowerOperations.openTrove(th._100pct, await getANTUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
       assert.isTrue((await th.getTroveEntireDebt(contracts, account)).eq(th.toBN(dec(2000, 18))))
     }
 
@@ -292,7 +292,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(scale, "1")
     
     // A re-fills SP back up to deposit 0 level, i.e. just enough to reduce P by 1e9 from a 2k debt liq.
-    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_1, ZERO_ADDRESS, {from: A})
 
      // Price drop -> liquidate Trove B -> price rises 
@@ -309,7 +309,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
 
     // A re-fills SP to ~2x pre-liq level, i.e. to trigger a newProductFactor > 1e9,
     // and trigger scale change and *increase* raw value of P again.
-    const deposit_2 = deposit_0.mul(th.toBN(2)).sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_2 = deposit_0.mul(th.toBN(2)).sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_2, ZERO_ADDRESS, {from: A})
 
     // Price drop -> liquidate Trove C -> price rises 
@@ -329,13 +329,13 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
   // --- Check depositors have correct stakes after experiencing scale change from depositing when P is tiny  ---
 
   it("5. Depositor have correct depleted stake after deposit at P == 1 and scale changing liq (with newProductFactor == 1e9)", async () => {
-    // Whale opens Trove with 100k ETH and sends 50k LUSD to A
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
+    // Whale opens Trove with 100k ETH and sends 50k ANTUSD to A
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
     await lusdToken.transfer(A, dec(50000, 18), {from: whale})
 
-    // Open 3 Troves with 2000 LUSD debt
+    // Open 3 Troves with 2000 ANTUSD debt
     for (account of [A, B, C]) {
-      await borrowerOperations.openTrove(th._100pct, await getLUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
+      await borrowerOperations.openTrove(th._100pct, await getANTUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
       assert.isTrue((await th.getTroveEntireDebt(contracts, account)).eq(th.toBN(dec(2000, 18))))
     }
 
@@ -361,7 +361,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(scale, "1")
     
     // A re-fills SP back up to deposit 0 level, i.e. just enough to reduce P by 1e9 from a 2k debt liq.
-    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_1, ZERO_ADDRESS, {from: A})
 
      // Price drop -> liquidate Trove B -> price rises 
@@ -376,14 +376,14 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     scale = (await stabilityPool.currentScale()).toString()
     assert.equal(scale, "2")
 
-    // D makes deposit of 1000 LUSD
+    // D makes deposit of 1000 ANTUSD
     const D_deposit = dec(1, 21)
     await lusdToken.transfer(D, dec(1, 21), {from: whale})
     await stabilityPool.provideToSP(D_deposit, ZERO_ADDRESS, {from: D})
 
     // A re-fills SP to ~1.000000001x pre-liq level, i.e. to trigger a newProductFactor == 1e9, 
     // (and trigger scale change)
-    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits()).add(th.toBN(dec(2,12)))
+    const deposit_2 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits()).add(th.toBN(dec(2,12)))
     await stabilityPool.provideToSP(deposit_2, ZERO_ADDRESS, {from: A})
     
     // Price drop -> liquidate Trove C -> price rises 
@@ -400,18 +400,18 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(scale, "3")
     
     // Check D's deposit has depleted to a billion'th of their initial deposit. That is, from 1e21 to 1e(21-9) = 1e12
-    const D_depletedDeposit = await stabilityPool.getCompoundedLUSDDeposit(D)
+    const D_depletedDeposit = await stabilityPool.getCompoundedANTUSDDeposit(D)
     assert.isTrue(D_depletedDeposit.eq(th.toBN(dec(1,12))))
   })
 
   it("6. Depositor have correct depleted stake after deposit at P == 1 and scale changing liq (with newProductFactor > 1e9)", async () => {
-    // Whale opens Trove with 100k ETH and sends 50k LUSD to A
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
+    // Whale opens Trove with 100k ETH and sends 50k ANTUSD to A
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(100000, 18)), whale, whale, dec(100000, 'ether'), { from: whale })
     await lusdToken.transfer(A, dec(50000, 18), {from: whale})
 
-    // Open 3 Troves with 2000 LUSD debt
+    // Open 3 Troves with 2000 ANTUSD debt
     for (account of [A, B, C]) {
-      await borrowerOperations.openTrove(th._100pct, await getLUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
+      await borrowerOperations.openTrove(th._100pct, await getANTUSDAmountForDesiredDebt(2000), account, account, dec(15, 'ether'), {from: account })
       assert.isTrue((await th.getTroveEntireDebt(contracts, account)).eq(th.toBN(dec(2000, 18))))
     }
 
@@ -437,7 +437,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(scale, "1")
     
     // A re-fills SP back up to deposit 0 level, i.e. just enough to reduce P by 1e9 from a 2k debt liq.
-    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_1 = deposit_0.sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_1, ZERO_ADDRESS, {from: A})
 
      // Price drop -> liquidate Trove B -> price rises 
@@ -452,14 +452,14 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     scale = (await stabilityPool.currentScale()).toString()
     assert.equal(scale, "2")
 
-    // D makes deposit of 1000 LUSD
+    // D makes deposit of 1000 ANTUSD
     const D_deposit = dec(1, 21)
     await lusdToken.transfer(D, dec(1, 21), {from: whale})
     await stabilityPool.provideToSP(D_deposit, ZERO_ADDRESS, {from: D})
 
     // A re-fills SP to ~2x pre-liq level, i.e. to trigger a newProductFactor > 1e9,
     // and trigger scale change and *increase* raw value of P again.
-    const deposit_2 = deposit_0.mul(th.toBN(2)).sub(await stabilityPool.getTotalLUSDDeposits())
+    const deposit_2 = deposit_0.mul(th.toBN(2)).sub(await stabilityPool.getTotalANTUSDDeposits())
     await stabilityPool.provideToSP(deposit_2, ZERO_ADDRESS, {from: A})
 
     // Price drop -> liquidate Trove C -> price rises 
@@ -476,7 +476,7 @@ contract('StabilityPool Scale Factor issue tests', async accounts => {
     assert.equal(scale, "3")
 
      // Check D's deposit has depleted to 50% their initial deposit. That is, from 1e21 to 5e20.
-     const D_depletedDeposit = await stabilityPool.getCompoundedLUSDDeposit(D)
+     const D_depletedDeposit = await stabilityPool.getCompoundedANTUSDDeposit(D)
      assert.isTrue(D_depletedDeposit.eq(th.toBN(dec(5, 20))))
   })
 })

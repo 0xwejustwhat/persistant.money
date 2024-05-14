@@ -44,7 +44,7 @@ const getPermitDigest = ( name, address, chainId, version,
     ]))
 }
 
-contract('LUSDToken', async accounts => {
+contract('ANTUSDToken', async accounts => {
   const [owner, alice, bob, carol, dennis] = accounts;
 
   const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
@@ -122,12 +122,12 @@ contract('LUSDToken', async accounts => {
 
     it("name(): returns the token's name", async () => {
       const name = await lusdTokenTester.name()
-      assert.equal(name, "LUSD Stablecoin")
+      assert.equal(name, "ANTUSD Stablecoin")
     })
 
     it("symbol(): returns the token's symbol", async () => {
       const symbol = await lusdTokenTester.symbol()
-      assert.equal(symbol, "LUSD")
+      assert.equal(symbol, "ANTUSD")
     })
 
     it("decimal(): returns the number of decimal digits used", async () => {
@@ -266,7 +266,7 @@ contract('LUSDToken', async accounts => {
       })
 
       it('returnFromPool(): changes balances of Stability pool and user by the correct amounts', async () => {
-        /// --- SETUP --- give pool 100 LUSD
+        /// --- SETUP --- give pool 100 ANTUSD
         await lusdTokenTester.unprotectedMint(stabilityPool.address, 100)
 
         /// --- TEST ---
@@ -371,7 +371,7 @@ contract('LUSDToken', async accounts => {
         // Check that we can not use re-use the same signature, since the user's nonce has been incremented (replay protection)
         await assertRevert(lusdTokenTester.permit(
           approve.owner, approve.spender, approve.value,
-          deadline, v, r, s), 'LUSD: invalid signature')
+          deadline, v, r, s), 'ANTUSD: invalid signature')
 
         // Check that the zero address fails
         await assertAssert(lusdTokenTester.permit('0x0000000000000000000000000000000000000000',
@@ -382,7 +382,7 @@ contract('LUSDToken', async accounts => {
         const deadline = 1
 
         const { v, r, s, tx } = await buildPermitTx(deadline)
-        await assertRevert(tx, 'LUSD: expired deadline')
+        await assertRevert(tx, 'ANTUSD: expired deadline')
       })
 
       it('permits(): fails with the wrong signature', async () => {
@@ -395,7 +395,7 @@ contract('LUSDToken', async accounts => {
           deadline, v, hexlify(r), hexlify(s)
         )
 
-        await assertRevert(tx, 'LUSD: invalid signature')
+        await assertRevert(tx, 'ANTUSD: invalid signature')
       })
     }
   }

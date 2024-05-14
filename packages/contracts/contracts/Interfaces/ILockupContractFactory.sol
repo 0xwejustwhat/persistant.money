@@ -6,12 +6,12 @@ interface ILockupContractFactory {
     
     // --- Events ---
 
-    event LQTYTokenAddressSet(address _lqtyTokenAddress);
+    event ANTMTokenAddressSet(address _antmTokenAddress);
     event LockupContractDeployedThroughFactory(address _lockupContractAddress, address _beneficiary, uint _unlockTime, address _deployer);
 
     // --- Functions ---
 
-    function setLQTYTokenAddress(address _lqtyTokenAddress) external;
+    function setANTMTokenAddress(address _antmTokenAddress) external;
 
     function deployLockupContract(address _beneficiary, uint _unlockTime) external;
 

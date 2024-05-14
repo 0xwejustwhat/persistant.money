@@ -285,11 +285,6 @@
           "internalType": "address",
           "name": "_activePoolAddress",
           "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_stETHAddress",
-          "type": "address"
         }
       ],
       "name": "setAddresses",

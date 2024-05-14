@@ -8,7 +8,7 @@ import "../Dependencies/IERC20.sol";
 contract ActivePoolTester is ActivePool {
     
     function unprotectedIncreaseLUSDDebt(uint _amount) external {
-        LUSDDebt  = LUSDDebt.add(_amount);
+        Debt  = Debt.add(_amount);
     }
 
     function unprotectedPayable(uint amount) external {

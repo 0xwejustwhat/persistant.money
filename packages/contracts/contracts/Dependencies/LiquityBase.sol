@@ -25,7 +25,7 @@ contract LiquityBase is BaseMath, ILiquityBase {
     uint constant public CCR = 1500000000000000000; // 150%
 
     // Amount of LUSD to be locked in gas pool on opening troves
-    uint constant public LUSD_GAS_COMPENSATION = 200e18;
+    uint constant public ANTUSD_GAS_COMPENSATION = 200e18;
 
     // Minimum amount of net LUSD debt a trove must have
     uint constant public MIN_NET_DEBT = 1800e18;
@@ -45,11 +45,11 @@ contract LiquityBase is BaseMath, ILiquityBase {
 
     // Returns the composite debt (drawn debt + gas compensation) of a trove, for the purpose of ICR calculation
     function _getCompositeDebt(uint _debt) internal pure returns (uint) {
-        return _debt.add(LUSD_GAS_COMPENSATION);
+        return _debt.add(ANTUSD_GAS_COMPENSATION);
     }
 
     function _getNetDebt(uint _debt) internal pure returns (uint) {
-        return _debt.sub(LUSD_GAS_COMPENSATION);
+        return _debt.sub(ANTUSD_GAS_COMPENSATION);
     }
 
     // Return the amount of ETH to be drawn from a trove's collateral and sent as gas compensation.
@@ -65,8 +65,8 @@ contract LiquityBase is BaseMath, ILiquityBase {
     }
 
     function getEntireSystemDebt() public view returns (uint entireSystemDebt) {
-        uint activeDebt = activePool.getLUSDDebt();
-        uint closedDebt = defaultPool.getLUSDDebt();
+        uint activeDebt = activePool.getANTUSDDebt();
+        uint closedDebt = defaultPool.getANTUSDDebt();
 
         return activeDebt.add(closedDebt);
     }

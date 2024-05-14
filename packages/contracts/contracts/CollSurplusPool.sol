@@ -19,6 +19,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     address public troveManagerAddress;
     address public activePoolAddress;
     address public stETHAddress;
+    address public rewardPoolAddress;
 
     // deposited ether tracker
     uint256 internal ETH;
@@ -40,7 +41,8 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
         address _activePoolAddress, 
-        address _stETHAddress
+        address _stETHAddress, 
+        address _rewardPoolAddress
     )
         external
         override
@@ -55,6 +57,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
         stETHAddress = _stETHAddress;
+        rewardPoolAddress = _rewardPoolAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -124,5 +127,10 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     function addETH(uint amount) external override {
         _requireCallerIsActivePool();
         ETH = ETH.add(amount);
+    }
+
+    function withdrawReward() external {
+        uint reward = IERC20(stETHAddress).balanceOf(address(this)) - ETH;
+        IERC20(stETHAddress).transfer(rewardPoolAddress, reward); 
     }
 }

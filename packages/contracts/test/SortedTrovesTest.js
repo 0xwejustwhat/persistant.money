@@ -5,7 +5,7 @@ const stETHAllocator = require("../utils/AllocateSTETH.js")
 const SortedTroves = artifacts.require("SortedTroves")
 const SortedTrovesTester = artifacts.require("SortedTrovesTester")
 const TroveManagerTester = artifacts.require("TroveManagerTester")
-const LUSDToken = artifacts.require("LUSDToken")
+const ANTUSDToken = artifacts.require("ANTUSDToken")
 
 const th = testHelpers.TestHelper
 const allocator = stETHAllocator.Allocator
@@ -55,14 +55,14 @@ contract('SortedTroves', async accounts => {
 
   let contracts
 
-  const getOpenTroveLUSDAmount = async (totalDebt) => th.getOpenTroveLUSDAmount(contracts, totalDebt)
+  const getOpenTroveANTUSDAmount = async (totalDebt) => th.getOpenTroveANTUSDAmount(contracts, totalDebt)
   const openTrove = async (params) => th.openTrove(contracts, params)
 
   describe('SortedTroves', () => {
     beforeEach(async () => {
       contracts = await deploymentHelper.deployLiquityCore()
       contracts.troveManager = await TroveManagerTester.new()
-      contracts.lusdToken = await LUSDToken.new(
+      contracts.lusdToken = await ANTUSDToken.new(
         contracts.troveManager.address,
         contracts.stabilityPool.address,
         contracts.borrowerOperations.address
@@ -113,7 +113,7 @@ contract('SortedTroves', async accounts => {
     })
 
     it('contains(): returns false for addresses that opened and then closed a trove', async () => {
-      await openTrove({ ICR: toBN(dec(1000, 18)), extraLUSDAmount: toBN(dec(3000, 18)), extraParams: { from: whale } })
+      await openTrove({ ICR: toBN(dec(1000, 18)), extraANTUSDAmount: toBN(dec(3000, 18)), extraParams: { from: whale } })
 
       await openTrove({ ICR: toBN(dec(150, 16)), extraParams: { from: alice } })
       await openTrove({ ICR: toBN(dec(20, 18)), extraParams: { from: bob } })
@@ -142,7 +142,7 @@ contract('SortedTroves', async accounts => {
 
     // true for addresses that opened -> closed -> opened a trove
     it('contains(): returns true for addresses that opened, closed and then re-opened a trove', async () => {
-      await openTrove({ ICR: toBN(dec(1000, 18)), extraLUSDAmount: toBN(dec(3000, 18)), extraParams: { from: whale } })
+      await openTrove({ ICR: toBN(dec(1000, 18)), extraANTUSDAmount: toBN(dec(3000, 18)), extraParams: { from: whale } })
 
       await openTrove({ ICR: toBN(dec(150, 16)), extraParams: { from: alice } })
       await openTrove({ ICR: toBN(dec(20, 18)), extraParams: { from: bob } })
