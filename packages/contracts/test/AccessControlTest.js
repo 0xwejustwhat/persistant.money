@@ -34,8 +34,8 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   let functionCaller
   let borrowerOperations
 
-  let lqtyStaking
-  let lqtyToken
+  let antmStaking
+  let antmToken
   let communityIssuance
   let lockupContractFactory
 
@@ -43,7 +43,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     coreContracts = await deploymentHelper.deployLiquityCore()
     coreContracts.troveManager = await TroveManagerTester.new()
     coreContracts = await deploymentHelper.deployANTUSDTokenTester(coreContracts)
-    const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisig)
+    const ANTMContracts = await deploymentHelper.deployANTMTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisig)
 
     await allocator.allocate(coreContracts, accounts)
     
@@ -58,14 +58,14 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     functionCaller = coreContracts.functionCaller
     borrowerOperations = coreContracts.borrowerOperations
 
-    lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
-    communityIssuance = LQTYContracts.communityIssuance
-    lockupContractFactory = LQTYContracts.lockupContractFactory
+    antmStaking = ANTMContracts.antmStaking
+    antmToken = ANTMContracts.antmToken
+    communityIssuance = ANTMContracts.communityIssuance
+    lockupContractFactory = ANTMContracts.lockupContractFactory
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, coreContracts)
+    await deploymentHelper.connectANTMContracts(ANTMContracts)
+    await deploymentHelper.connectCoreContracts(coreContracts, ANTMContracts)
+    await deploymentHelper.connectANTMContractsToCore(ANTMContracts, coreContracts)
 
     for (account of accounts.slice(0, 10)) {
       await th.openTrove(coreContracts, { extraANTUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: account } })
@@ -74,7 +74,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     const expectedCISupplyCap = '32000000000000000000000000' // 32mil
 
     // Check CI has been properly funded
-    const bal = await lqtyToken.balanceOf(communityIssuance.address)
+    const bal = await antmToken.balanceOf(communityIssuance.address)
     assert.equal(bal, expectedCISupplyCap)
   })
 
@@ -442,9 +442,9 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   })
 
   describe('LockupContract', async accounts => {
-    it("withdrawLQTY(): reverts when caller is not beneficiary", async () => {
+    it("withdrawANTM(): reverts when caller is not beneficiary", async () => {
       // deploy new LC with Carol as beneficiary
-      const unlockTime = (await lqtyToken.getDeploymentStartTime()).add(toBN(timeValues.SECONDS_IN_ONE_YEAR))
+      const unlockTime = (await antmToken.getDeploymentStartTime()).add(toBN(timeValues.SECONDS_IN_ONE_YEAR))
       const deployedLCtx = await lockupContractFactory.deployLockupContract(
         carol, 
         unlockTime,
@@ -452,30 +452,30 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
 
       const LC = await th.getLCFromDeploymentTx(deployedLCtx)
 
-      // LQTY Multisig funds the LC
-      await lqtyToken.transfer(LC.address, dec(100, 18), { from: multisig })
+      // ANTM Multisig funds the LC
+      await antmToken.transfer(LC.address, dec(100, 18), { from: multisig })
 
       // Fast-forward one year, so that beneficiary can withdraw
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
-      // Bob attempts to withdraw LQTY
+      // Bob attempts to withdraw ANTM
       try {
-        const txBob = await LC.withdrawLQTY({ from: bob })
+        const txBob = await LC.withdrawANTM({ from: bob })
         
       } catch (err) {
         assert.include(err.message, "revert")
       }
 
       // Confirm beneficiary, Carol, can withdraw
-      const txCarol = await LC.withdrawLQTY({ from: carol })
+      const txCarol = await LC.withdrawANTM({ from: carol })
       assert.isTrue(txCarol.receipt.status)
     })
   })
 
-  describe('LQTYStaking', async accounts => {
+  describe('ANTMStaking', async accounts => {
     it("increaseF_ANTUSD(): reverts when caller is not TroveManager", async () => {
       try {
-        const txAlice = await lqtyStaking.increaseF_ANTUSD(dec(1, 18), { from: alice })
+        const txAlice = await antmStaking.increaseF_ANTUSD(dec(1, 18), { from: alice })
         
       } catch (err) {
         assert.include(err.message, "revert")
@@ -483,14 +483,14 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     })
   })
 
-  describe('LQTYToken', async accounts => {
-    it("sendToLQTYStaking(): reverts when caller is not the LQTYSstaking", async () => {
-      // Check multisig has some LQTY
-      assert.isTrue((await lqtyToken.balanceOf(multisig)).gt(toBN('0')))
+  describe('ANTMToken', async accounts => {
+    it("sendToANTMStaking(): reverts when caller is not the ANTMSstaking", async () => {
+      // Check multisig has some ANTM
+      assert.isTrue((await antmToken.balanceOf(multisig)).gt(toBN('0')))
 
       // multisig tries to call it
       try {
-        const tx = await lqtyToken.sendToLQTYStaking(multisig, 1, { from: multisig })
+        const tx = await antmToken.sendToANTMStaking(multisig, 1, { from: multisig })
       } catch (err) {
         assert.include(err.message, "revert")
       }
@@ -498,13 +498,13 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
       // FF >> time one year
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
-      // Owner transfers 1 LQTY to bob
-      await lqtyToken.transfer(bob, dec(1, 18), { from: multisig })
-      assert.equal((await lqtyToken.balanceOf(bob)), dec(1, 18))
+      // Owner transfers 1 ANTM to bob
+      await antmToken.transfer(bob, dec(1, 18), { from: multisig })
+      assert.equal((await antmToken.balanceOf(bob)), dec(1, 18))
 
       // Bob tries to call it
       try {
-        const tx = await lqtyToken.sendToLQTYStaking(bob, dec(1, 18), { from: bob })
+        const tx = await antmToken.sendToANTMStaking(bob, dec(1, 18), { from: bob })
       } catch (err) {
         assert.include(err.message, "revert")
       }
@@ -512,18 +512,18 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   })
 
   describe('CommunityIssuance', async accounts => {
-    it("sendLQTY(): reverts when caller is not the StabilityPool", async () => {
-      const tx1 = communityIssuance.sendLQTY(alice, dec(100, 18), {from: alice})
-      const tx2 = communityIssuance.sendLQTY(bob, dec(100, 18), {from: alice})
-      const tx3 = communityIssuance.sendLQTY(stabilityPool.address, dec(100, 18), {from: alice})
+    it("sendANTM(): reverts when caller is not the StabilityPool", async () => {
+      const tx1 = communityIssuance.sendANTM(alice, dec(100, 18), {from: alice})
+      const tx2 = communityIssuance.sendANTM(bob, dec(100, 18), {from: alice})
+      const tx3 = communityIssuance.sendANTM(stabilityPool.address, dec(100, 18), {from: alice})
      
       assertRevert(tx1)
       assertRevert(tx2)
       assertRevert(tx3)
     })
 
-    it("issueLQTY(): reverts when caller is not the StabilityPool", async () => {
-      const tx1 = communityIssuance.issueLQTY({from: alice})
+    it("issueANTM(): reverts when caller is not the StabilityPool", async () => {
+      const tx1 = communityIssuance.issueANTM({from: alice})
 
       assertRevert(tx1)
     })

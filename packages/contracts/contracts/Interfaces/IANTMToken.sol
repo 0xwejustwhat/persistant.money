@@ -10,7 +10,7 @@ interface IANTMToken is IERC20, IERC2612 {
     // --- Events ---
     
     event CommunityIssuanceAddressSet(address _communityIssuanceAddress);
-    event ANTMStakingAddressSet(address _lqtyStakingAddress);
+    event ANTMStakingAddressSet(address _antmStakingAddress);
     event LockupContractFactoryAddressSet(address _lockupContractFactoryAddress);
 
     // --- Functions ---

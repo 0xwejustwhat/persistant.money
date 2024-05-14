@@ -37,14 +37,14 @@ contract('StabilityPool', async accounts => {
   const frontEnds = [frontEnd_1, frontEnd_2, frontEnd_3]
   let contracts
   let priceFeed
-  let lusdToken
+  let antusdToken
   let sortedTroves
   let troveManager
   let activePool
   let stabilityPool
   let defaultPool
   let borrowerOperations
-  let lqtyToken
+  let antmToken
   let communityIssuance
 
   let gasPriceInWei
@@ -62,17 +62,17 @@ contract('StabilityPool', async accounts => {
     beforeEach(async () => {
       contracts = await deploymentHelper.deployLiquityCore()
       contracts.troveManager = await TroveManagerTester.new()
-      contracts.lusdToken = await ANTUSDToken.new(
+      contracts.antusdToken = await ANTUSDToken.new(
         contracts.troveManager.address,
         contracts.stabilityPool.address,
         contracts.borrowerOperations.address
       )
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+      const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
       await allocator.allocate(contracts, accounts.slice(0, 30))
 
       priceFeed = contracts.priceFeedTestnet
-      lusdToken = contracts.lusdToken
+      antusdToken = contracts.antusdToken
       sortedTroves = contracts.sortedTroves
       troveManager = contracts.troveManager
       activePool = contracts.activePool
@@ -81,12 +81,12 @@ contract('StabilityPool', async accounts => {
       borrowerOperations = contracts.borrowerOperations
       hintHelpers = contracts.hintHelpers
 
-      lqtyToken = LQTYContracts.lqtyToken
-      communityIssuance = LQTYContracts.communityIssuance
+      antmToken = ANTMContracts.antmToken
+      communityIssuance = ANTMContracts.communityIssuance
 
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
-      await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-      await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+      await deploymentHelper.connectANTMContracts(ANTMContracts)
+      await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+      await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
 
       // Register 3 front ends
       await th.registerFrontEnds(frontEnds, stabilityPool)
@@ -131,13 +131,13 @@ contract('StabilityPool', async accounts => {
 
       // --- TEST ---
       // get user's deposit record before
-      const alice_ANTUSDBalance_Before = await lusdToken.balanceOf(alice)
+      const alice_ANTUSDBalance_Before = await antusdToken.balanceOf(alice)
 
       // provideToSP()
       await stabilityPool.provideToSP(200, frontEnd_1, { from: alice })
 
       // check user's ANTUSD balance change
-      const alice_ANTUSDBalance_After = await lusdToken.balanceOf(alice)
+      const alice_ANTUSDBalance_After = await antusdToken.balanceOf(alice)
       assert.equal(alice_ANTUSDBalance_Before.sub(alice_ANTUSDBalance_After), '200')
     })
 
@@ -157,7 +157,7 @@ contract('StabilityPool', async accounts => {
 
       // Whale opens Trove and deposits to SP
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
-      const whaleANTUSD = await lusdToken.balanceOf(whale)
+      const whaleANTUSD = await antusdToken.balanceOf(whale)
       await stabilityPool.provideToSP(whaleANTUSD, frontEnd_1, { from: whale })
 
       // 2 Troves opened, each withdraws minimum debt
@@ -217,7 +217,7 @@ contract('StabilityPool', async accounts => {
       // --- SETUP ---
       // Whale opens Trove and deposits to SP
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
-      const whaleANTUSD = await lusdToken.balanceOf(whale)
+      const whaleANTUSD = await antusdToken.balanceOf(whale)
       await stabilityPool.provideToSP(whaleANTUSD, frontEnd_1, { from: whale })
 
       // 3 Troves opened. Two users withdraw 160 ANTUSD each
@@ -296,8 +296,8 @@ contract('StabilityPool', async accounts => {
 
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: alice, value: dec(50, 'ether') } })
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: bob, value: dec(50, 'ether') } })
-      const aliceANTUSDbal = await lusdToken.balanceOf(alice)
-      const bobANTUSDbal = await lusdToken.balanceOf(bob)
+      const aliceANTUSDbal = await antusdToken.balanceOf(alice)
+      const bobANTUSDbal = await antusdToken.balanceOf(bob)
 
       // Alice, attempts to deposit 1 wei more than her balance
 
@@ -339,7 +339,7 @@ contract('StabilityPool', async accounts => {
       // --- TEST ---
 
       const nonPayable = await NonPayable.new()
-      await lusdToken.transfer(nonPayable.address, dec(250, 18), { from: whale })
+      await antusdToken.transfer(nonPayable.address, dec(250, 18), { from: whale })
 
       // NonPayable makes deposit #1: 150 ANTUSD
       const txData1 = th.getTransactionData('provideToSP(uint256,address)', [web3.utils.toHex(dec(150, 18)), frontEnd_1])
@@ -613,8 +613,8 @@ contract('StabilityPool', async accounts => {
       await th.assertRevert(txPromise_B)
     })
 
-    // --- LQTY functionality ---
-    it("provideToSP(), new deposit: when SP > 0, triggers LQTY reward event - increases the sum G", async () => {
+    // --- ANTM functionality ---
+    it("provideToSP(), new deposit: when SP > 0, triggers ANTM reward event - increases the sum G", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
 
       // A, B, C open troves and make Stability Pool deposits
@@ -638,7 +638,7 @@ contract('StabilityPool', async accounts => {
       currentScale = await stabilityPool.currentScale()
       const G_After = await stabilityPool.epochToScaleToG(currentEpoch, currentScale)
 
-      // Expect G has increased from the LQTY reward event triggered
+      // Expect G has increased from the ANTM reward event triggered
       assert.isTrue(G_After.gt(G_Before))
     })
 
@@ -720,19 +720,19 @@ contract('StabilityPool', async accounts => {
       assert.equal(D_tagAfter, ZERO_ADDRESS)
     })
 
-    it("provideToSP(), new deposit: depositor does not receive any LQTY rewards", async () => {
+    it("provideToSP(), new deposit: depositor does not receive any ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
 
       // A, B, open troves 
       await openTrove({ extraANTUSDAmount: toBN(dec(1000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
       await openTrove({ extraANTUSDAmount: toBN(dec(2000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
 
-      // Get A, B, C LQTY balances before and confirm they're zero
-      const A_LQTYBalance_Before = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_Before = await lqtyToken.balanceOf(B)
+      // Get A, B, C ANTM balances before and confirm they're zero
+      const A_ANTMBalance_Before = await antmToken.balanceOf(A)
+      const B_ANTMBalance_Before = await antmToken.balanceOf(B)
 
-      assert.equal(A_LQTYBalance_Before, '0')
-      assert.equal(B_LQTYBalance_Before, '0')
+      assert.equal(A_ANTMBalance_Before, '0')
+      assert.equal(B_ANTMBalance_Before, '0')
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
@@ -740,15 +740,15 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(1000, 18), frontEnd_1, { from: A })
       await stabilityPool.provideToSP(dec(2000, 18), ZERO_ADDRESS, { from: B })
 
-      // Get A, B, C LQTY balances after, and confirm they're still zero
-      const A_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_After = await lqtyToken.balanceOf(B)
+      // Get A, B, C ANTM balances after, and confirm they're still zero
+      const A_ANTMBalance_After = await antmToken.balanceOf(A)
+      const B_ANTMBalance_After = await antmToken.balanceOf(B)
 
-      assert.equal(A_LQTYBalance_After, '0')
-      assert.equal(B_LQTYBalance_After, '0')
+      assert.equal(A_ANTMBalance_After, '0')
+      assert.equal(B_ANTMBalance_After, '0')
     })
 
-    it("provideToSP(), new deposit after past full withdrawal: depositor does not receive any LQTY rewards", async () => {
+    it("provideToSP(), new deposit after past full withdrawal: depositor does not receive any ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C, open troves 
@@ -761,8 +761,8 @@ contract('StabilityPool', async accounts => {
 
       // --- SETUP --- 
 
-      const initialDeposit_A = await lusdToken.balanceOf(A)
-      const initialDeposit_B = await lusdToken.balanceOf(B)
+      const initialDeposit_A = await antusdToken.balanceOf(A)
+      const initialDeposit_B = await antusdToken.balanceOf(B)
       // A, B provide to SP
       await stabilityPool.provideToSP(initialDeposit_A, frontEnd_1, { from: A })
       await stabilityPool.provideToSP(initialDeposit_B, frontEnd_2, { from: B })
@@ -770,7 +770,7 @@ contract('StabilityPool', async accounts => {
       // time passes
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // C deposits. A, and B earn LQTY
+      // C deposits. A, and B earn ANTM
       await stabilityPool.provideToSP(dec(5, 18), ZERO_ADDRESS, { from: C })
 
       // Price drops, defaulter is liquidated, A, B and C earn ETH
@@ -788,11 +788,11 @@ contract('StabilityPool', async accounts => {
 
       // --- TEST --- 
 
-      // Get A, B, C LQTY balances before and confirm they're non-zero
-      const A_LQTYBalance_Before = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_Before = await lqtyToken.balanceOf(B)
-      assert.isTrue(A_LQTYBalance_Before.gt(toBN('0')))
-      assert.isTrue(B_LQTYBalance_Before.gt(toBN('0')))
+      // Get A, B, C ANTM balances before and confirm they're non-zero
+      const A_ANTMBalance_Before = await antmToken.balanceOf(A)
+      const B_ANTMBalance_Before = await antmToken.balanceOf(B)
+      assert.isTrue(A_ANTMBalance_Before.gt(toBN('0')))
+      assert.isTrue(B_ANTMBalance_Before.gt(toBN('0')))
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
@@ -800,15 +800,15 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(100, 18), frontEnd_1, { from: A })
       await stabilityPool.provideToSP(dec(200, 18), ZERO_ADDRESS, { from: B })
 
-      // Get A, B, C LQTY balances after, and confirm they have not changed
-      const A_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_After = await lqtyToken.balanceOf(B)
+      // Get A, B, C ANTM balances after, and confirm they have not changed
+      const A_ANTMBalance_After = await antmToken.balanceOf(A)
+      const B_ANTMBalance_After = await antmToken.balanceOf(B)
 
-      assert.isTrue(A_LQTYBalance_After.eq(A_LQTYBalance_Before))
-      assert.isTrue(B_LQTYBalance_After.eq(B_LQTYBalance_Before))
+      assert.isTrue(A_ANTMBalance_After.eq(A_ANTMBalance_Before))
+      assert.isTrue(B_ANTMBalance_After.eq(B_ANTMBalance_Before))
     })
 
-    it("provideToSP(), new eligible deposit: tagged front end receives LQTY rewards", async () => {
+    it("provideToSP(), new eligible deposit: tagged front end receives ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C, open troves 
@@ -824,38 +824,38 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(2000, 18), frontEnd_2, { from: E })
       await stabilityPool.provideToSP(dec(3000, 18), frontEnd_3, { from: F })
 
-      // Get F1, F2, F3 LQTY balances before, and confirm they're zero
-      const frontEnd_1_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_1)
-      const frontEnd_2_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_2)
-      const frontEnd_3_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_3)
+      // Get F1, F2, F3 ANTM balances before, and confirm they're zero
+      const frontEnd_1_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_1)
+      const frontEnd_2_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_2)
+      const frontEnd_3_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_3)
 
-      assert.equal(frontEnd_1_LQTYBalance_Before, '0')
-      assert.equal(frontEnd_2_LQTYBalance_Before, '0')
-      assert.equal(frontEnd_3_LQTYBalance_Before, '0')
+      assert.equal(frontEnd_1_ANTMBalance_Before, '0')
+      assert.equal(frontEnd_2_ANTMBalance_Before, '0')
+      assert.equal(frontEnd_3_ANTMBalance_Before, '0')
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // console.log(`LQTYSupplyCap before: ${await communityIssuance.LQTYSupplyCap()}`)
-      // console.log(`totalLQTYIssued before: ${await communityIssuance.totalLQTYIssued()}`)
-      // console.log(`LQTY balance of CI before: ${await lqtyToken.balanceOf(communityIssuance.address)}`)
+      // console.log(`ANTMSupplyCap before: ${await communityIssuance.ANTMSupplyCap()}`)
+      // console.log(`totalANTMIssued before: ${await communityIssuance.totalANTMIssued()}`)
+      // console.log(`ANTM balance of CI before: ${await antmToken.balanceOf(communityIssuance.address)}`)
 
       // A, B, C provide to SP
       await stabilityPool.provideToSP(dec(1000, 18), frontEnd_1, { from: A })
       await stabilityPool.provideToSP(dec(2000, 18), frontEnd_2, { from: B })
       await stabilityPool.provideToSP(dec(3000, 18), frontEnd_3, { from: C })
 
-      // console.log(`LQTYSupplyCap after: ${await communityIssuance.LQTYSupplyCap()}`)
-      // console.log(`totalLQTYIssued after: ${await communityIssuance.totalLQTYIssued()}`)
-      // console.log(`LQTY balance of CI after: ${await lqtyToken.balanceOf(communityIssuance.address)}`)
+      // console.log(`ANTMSupplyCap after: ${await communityIssuance.ANTMSupplyCap()}`)
+      // console.log(`totalANTMIssued after: ${await communityIssuance.totalANTMIssued()}`)
+      // console.log(`ANTM balance of CI after: ${await antmToken.balanceOf(communityIssuance.address)}`)
 
-      // Get F1, F2, F3 LQTY balances after, and confirm they have increased
-      const frontEnd_1_LQTYBalance_After = await lqtyToken.balanceOf(frontEnd_1)
-      const frontEnd_2_LQTYBalance_After = await lqtyToken.balanceOf(frontEnd_2)
-      const frontEnd_3_LQTYBalance_After = await lqtyToken.balanceOf(frontEnd_3)
+      // Get F1, F2, F3 ANTM balances after, and confirm they have increased
+      const frontEnd_1_ANTMBalance_After = await antmToken.balanceOf(frontEnd_1)
+      const frontEnd_2_ANTMBalance_After = await antmToken.balanceOf(frontEnd_2)
+      const frontEnd_3_ANTMBalance_After = await antmToken.balanceOf(frontEnd_3)
 
-      assert.isTrue(frontEnd_1_LQTYBalance_After.gt(frontEnd_1_LQTYBalance_Before))
-      assert.isTrue(frontEnd_2_LQTYBalance_After.gt(frontEnd_2_LQTYBalance_Before))
-      assert.isTrue(frontEnd_3_LQTYBalance_After.gt(frontEnd_3_LQTYBalance_Before))
+      assert.isTrue(frontEnd_1_ANTMBalance_After.gt(frontEnd_1_ANTMBalance_Before))
+      assert.isTrue(frontEnd_2_ANTMBalance_After.gt(frontEnd_2_ANTMBalance_Before))
+      assert.isTrue(frontEnd_3_ANTMBalance_After.gt(frontEnd_3_ANTMBalance_Before))
     })
 
     it("provideToSP(), new eligible deposit: tagged front end's stake increases", async () => {
@@ -985,8 +985,8 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // Whale transfers ANTUSD to A, B
-      await lusdToken.transfer(A, dec(100, 18), { from: whale })
-      await lusdToken.transfer(B, dec(200, 18), { from: whale })
+      await antusdToken.transfer(A, dec(100, 18), { from: whale })
+      await antusdToken.transfer(B, dec(200, 18), { from: whale })
 
       // C, D open troves
       await openTrove({ extraANTUSDAmount: toBN(dec(1000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
@@ -1031,8 +1031,8 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // Whale transfers ANTUSD to A, B
-      await lusdToken.transfer(A, dec(1000, 18), { from: whale })
-      await lusdToken.transfer(B, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(A, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(B, dec(1000, 18), { from: whale })
 
       // C, D open troves
       await openTrove({ extraANTUSDAmount: toBN(dec(4000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
@@ -1050,7 +1050,7 @@ contract('StabilityPool', async accounts => {
       // time passes
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // B deposits. A,B,C,D earn LQTY
+      // B deposits. A,B,C,D earn ANTM
       await stabilityPool.provideToSP(dec(5, 18), ZERO_ADDRESS, { from: B })
 
       // Price drops, defaulter is liquidated, A, B, C, D earn ETH
@@ -1101,7 +1101,7 @@ contract('StabilityPool', async accounts => {
       assert.equal(D_ETHBalance_After, D_expectedBalance)
     })
 
-    it("provideToSP(), topup: triggers LQTY reward event - increases the sum G", async () => {
+    it("provideToSP(), topup: triggers ANTM reward event - increases the sum G", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves 
@@ -1125,7 +1125,7 @@ contract('StabilityPool', async accounts => {
 
       const G_After = await stabilityPool.epochToScaleToG(0, 0)
 
-      // Expect G has increased from the LQTY reward event triggered by B's topup
+      // Expect G has increased from the ANTM reward event triggered by B's topup
       assert.isTrue(G_After.gt(G_Before))
     })
 
@@ -1133,8 +1133,8 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // whale transfer to troves D and E
-      await lusdToken.transfer(D, dec(100, 18), { from: whale })
-      await lusdToken.transfer(E, dec(200, 18), { from: whale })
+      await antusdToken.transfer(D, dec(100, 18), { from: whale })
+      await antusdToken.transfer(E, dec(200, 18), { from: whale })
 
       // A, B, C open troves 
       await openTrove({ extraANTUSDAmount: toBN(dec(100, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
@@ -1172,7 +1172,7 @@ contract('StabilityPool', async accounts => {
       assert.equal(frontEndTag_E, ZERO_ADDRESS)
     })
 
-    it("provideToSP(), topup: depositor receives LQTY rewards", async () => {
+    it("provideToSP(), topup: depositor receives ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves 
@@ -1187,28 +1187,28 @@ contract('StabilityPool', async accounts => {
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // Get A, B, C LQTY balance before
-      const A_LQTYBalance_Before = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_Before = await lqtyToken.balanceOf(B)
-      const C_LQTYBalance_Before = await lqtyToken.balanceOf(C)
+      // Get A, B, C ANTM balance before
+      const A_ANTMBalance_Before = await antmToken.balanceOf(A)
+      const B_ANTMBalance_Before = await antmToken.balanceOf(B)
+      const C_ANTMBalance_Before = await antmToken.balanceOf(C)
 
       // A, B, C top up
       await stabilityPool.provideToSP(dec(10, 18), frontEnd_1, { from: A })
       await stabilityPool.provideToSP(dec(20, 18), frontEnd_2, { from: B })
       await stabilityPool.provideToSP(dec(30, 18), ZERO_ADDRESS, { from: C })
 
-      // Get LQTY balance after
-      const A_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_After = await lqtyToken.balanceOf(B)
-      const C_LQTYBalance_After = await lqtyToken.balanceOf(C)
+      // Get ANTM balance after
+      const A_ANTMBalance_After = await antmToken.balanceOf(A)
+      const B_ANTMBalance_After = await antmToken.balanceOf(B)
+      const C_ANTMBalance_After = await antmToken.balanceOf(C)
 
-      // Check LQTY Balance of A, B, C has increased
-      assert.isTrue(A_LQTYBalance_After.gt(A_LQTYBalance_Before))
-      assert.isTrue(B_LQTYBalance_After.gt(B_LQTYBalance_Before))
-      assert.isTrue(C_LQTYBalance_After.gt(C_LQTYBalance_Before))
+      // Check ANTM Balance of A, B, C has increased
+      assert.isTrue(A_ANTMBalance_After.gt(A_ANTMBalance_Before))
+      assert.isTrue(B_ANTMBalance_After.gt(B_ANTMBalance_Before))
+      assert.isTrue(C_ANTMBalance_After.gt(C_ANTMBalance_Before))
     })
 
-    it("provideToSP(), topup: tagged front end receives LQTY rewards", async () => {
+    it("provideToSP(), topup: tagged front end receives ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves 
@@ -1223,25 +1223,25 @@ contract('StabilityPool', async accounts => {
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // Get front ends' LQTY balance before
-      const F1_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_1)
-      const F2_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_2)
-      const F3_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_3)
+      // Get front ends' ANTM balance before
+      const F1_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_1)
+      const F2_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_2)
+      const F3_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_3)
 
       // A, B, C top up  (front end param passed here is irrelevant)
       await stabilityPool.provideToSP(dec(10, 18), ZERO_ADDRESS, { from: A })  // provides no front end param
       await stabilityPool.provideToSP(dec(20, 18), frontEnd_1, { from: B })  // provides front end that doesn't match his tag
       await stabilityPool.provideToSP(dec(30, 18), frontEnd_3, { from: C }) // provides front end that matches his tag
 
-      // Get front ends' LQTY balance after
-      const F1_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const F2_LQTYBalance_After = await lqtyToken.balanceOf(B)
-      const F3_LQTYBalance_After = await lqtyToken.balanceOf(C)
+      // Get front ends' ANTM balance after
+      const F1_ANTMBalance_After = await antmToken.balanceOf(A)
+      const F2_ANTMBalance_After = await antmToken.balanceOf(B)
+      const F3_ANTMBalance_After = await antmToken.balanceOf(C)
 
-      // Check LQTY Balance of front ends has increased
-      assert.isTrue(F1_LQTYBalance_After.gt(F1_LQTYBalance_Before))
-      assert.isTrue(F2_LQTYBalance_After.gt(F2_LQTYBalance_Before))
-      assert.isTrue(F3_LQTYBalance_After.gt(F3_LQTYBalance_Before))
+      // Check ANTM Balance of front ends has increased
+      assert.isTrue(F1_ANTMBalance_After.gt(F1_ANTMBalance_Before))
+      assert.isTrue(F2_ANTMBalance_After.gt(F2_ANTMBalance_Before))
+      assert.isTrue(F3_ANTMBalance_After.gt(F3_ANTMBalance_Before))
     })
 
     it("provideToSP(), topup: tagged front end's stake increases", async () => {
@@ -1313,7 +1313,7 @@ contract('StabilityPool', async accounts => {
       // fastforward time then make an SP deposit, to make G > 0
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      await stabilityPool.provideToSP(await lusdToken.balanceOf(D), ZERO_ADDRESS, { from: D })
+      await stabilityPool.provideToSP(await antusdToken.balanceOf(D), ZERO_ADDRESS, { from: D })
 
       // perform a liquidation to make 0 < P < 1, and S > 0
       await priceFeed.setPrice(dec(100, 18))
@@ -1348,7 +1348,7 @@ contract('StabilityPool', async accounts => {
       // --- TEST ---
 
       // A, B, C top up their deposits. Grab G at each stage, as it can increase a bit
-      // between topups, because some block.timestamp time passes (and LQTY is issued) between ops
+      // between topups, because some block.timestamp time passes (and ANTM is issued) between ops
       const G1 = await stabilityPool.epochToScaleToG(currentScale, currentEpoch)
       await stabilityPool.provideToSP(deposit_A, frontEnd_1, { from: A })
 
@@ -1384,8 +1384,8 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(2000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
 
       // Whale transfers ANTUSD to C, D
-      await lusdToken.transfer(C, dec(100, 18), { from: whale })
-      await lusdToken.transfer(D, dec(100, 18), { from: whale })
+      await antusdToken.transfer(C, dec(100, 18), { from: whale })
+      await antusdToken.transfer(D, dec(100, 18), { from: whale })
 
       txPromise_A = stabilityPool.provideToSP(0, frontEnd_1, { from: A })
       txPromise_B = stabilityPool.provideToSP(0, ZERO_ADDRESS, { from: B })
@@ -1820,8 +1820,8 @@ contract('StabilityPool', async accounts => {
       await priceFeed.setPrice(dec(105, 18))
       await troveManager.liquidate(defaulter_1)
 
-      const aliceBalBefore = await lusdToken.balanceOf(alice)
-      const bobBalBefore = await lusdToken.balanceOf(bob)
+      const aliceBalBefore = await antusdToken.balanceOf(alice)
+      const bobBalBefore = await antusdToken.balanceOf(bob)
 
       /* From an offset of 10000 ANTUSD, each depositor receives
       ANTUSDLoss = 1666.6666666666666666 ANTUSD
@@ -1837,13 +1837,13 @@ contract('StabilityPool', async accounts => {
 
       // Expect Alice's ANTUSD balance increase be very close to 8333.3333333333333333 ANTUSD
       await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
-      const aliceBalance = (await lusdToken.balanceOf(alice))
+      const aliceBalance = (await antusdToken.balanceOf(alice))
 
       assert.isAtMost(th.getDifference(aliceBalance.sub(aliceBalBefore), '8333333333333333333333'), 100000)
 
       // expect Bob's ANTUSD balance increase to be very close to  13333.33333333333333333 ANTUSD
       await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
-      const bobBalance = (await lusdToken.balanceOf(bob))
+      const bobBalance = (await antusdToken.balanceOf(bob))
       assert.isAtMost(th.getDifference(bobBalance.sub(bobBalBefore), '13333333333333333333333'), 100000)
     })
 
@@ -2060,13 +2060,13 @@ contract('StabilityPool', async accounts => {
       assert.isTrue(await sortedTroves.contains(defaulter_2))
 
       const A_ETHBalBefore = toBN(await contracts.stETH.balanceOf(A))
-      const A_LQTYBalBefore = await lqtyToken.balanceOf(A)
+      const A_ANTMBalBefore = await antmToken.balanceOf(A)
 
       // Check Alice has gains to withdraw
       const A_pendingETHGain = await stabilityPool.getDepositorETHGain(A)
-      const A_pendingLQTYGain = await stabilityPool.getDepositorLQTYGain(A)
+      const A_pendingANTMGain = await stabilityPool.getDepositorANTMGain(A)
       assert.isTrue(A_pendingETHGain.gt(toBN('0')))
-      assert.isTrue(A_pendingLQTYGain.gt(toBN('0')))
+      assert.isTrue(A_pendingANTMGain.gt(toBN('0')))
 
       // Check withdrawal of 0 succeeds
       const tx = await stabilityPool.withdrawFromSP(0, { from: A, gasPrice: GAS_PRICE })
@@ -2076,12 +2076,12 @@ contract('StabilityPool', async accounts => {
   
       const A_ETHBalAfter = toBN(await contracts.stETH.balanceOf(A))
 
-      const A_LQTYBalAfter = await lqtyToken.balanceOf(A)
-      const A_LQTYBalDiff = A_LQTYBalAfter.sub(A_LQTYBalBefore)
+      const A_ANTMBalAfter = await antmToken.balanceOf(A)
+      const A_ANTMBalDiff = A_ANTMBalAfter.sub(A_ANTMBalBefore)
 
-      // Check A's ETH and LQTY balances have increased correctly
+      // Check A's ETH and ANTM balances have increased correctly
       assert.isTrue(A_ETHBalAfter.sub(A_expectedBalance).eq(A_pendingETHGain))
-      assert.isAtMost(th.getDifference(A_LQTYBalDiff, A_pendingLQTYGain), 1000)
+      assert.isAtMost(th.getDifference(A_ANTMBalDiff, A_pendingANTMGain), 1000)
     })
 
     it("withdrawFromSP(): withdrawing 0 ANTUSD doesn't alter the caller's deposit or the total ANTUSD in the Stability Pool", async () => {
@@ -2184,8 +2184,8 @@ contract('StabilityPool', async accounts => {
       // Liquidate defaulter 1
       await troveManager.liquidate(defaulter_1)
 
-      const alice_ANTUSD_Balance_Before = await lusdToken.balanceOf(alice)
-      const bob_ANTUSD_Balance_Before = await lusdToken.balanceOf(bob)
+      const alice_ANTUSD_Balance_Before = await antusdToken.balanceOf(alice)
+      const bob_ANTUSD_Balance_Before = await antusdToken.balanceOf(bob)
 
       const alice_Deposit_Before = await stabilityPool.getCompoundedANTUSDDeposit(alice)
       const bob_Deposit_Before = await stabilityPool.getCompoundedANTUSDDeposit(bob)
@@ -2199,7 +2199,7 @@ contract('StabilityPool', async accounts => {
 
       // Check Bob's ANTUSD balance has risen by only the value of his compounded deposit
       const bob_expectedANTUSDBalance = (bob_ANTUSD_Balance_Before.add(bob_Deposit_Before)).toString()
-      const bob_ANTUSD_Balance_After = (await lusdToken.balanceOf(bob)).toString()
+      const bob_ANTUSD_Balance_After = (await antusdToken.balanceOf(bob)).toString()
       assert.equal(bob_ANTUSD_Balance_After, bob_expectedANTUSDBalance)
 
       // Alice attempts to withdraws 2309842309.000000000000000000 ANTUSD from the Stability Pool 
@@ -2207,7 +2207,7 @@ contract('StabilityPool', async accounts => {
 
       // Check Alice's ANTUSD balance has risen by only the value of her compounded deposit
       const alice_expectedANTUSDBalance = (alice_ANTUSD_Balance_Before.add(alice_Deposit_Before)).toString()
-      const alice_ANTUSD_Balance_After = (await lusdToken.balanceOf(alice)).toString()
+      const alice_ANTUSD_Balance_After = (await antusdToken.balanceOf(alice)).toString()
       assert.equal(alice_ANTUSD_Balance_After, alice_expectedANTUSDBalance)
 
       // Check ANTUSD in Stability Pool has been reduced by only Alice's compounded deposit and Bob's compounded deposit
@@ -2244,7 +2244,7 @@ contract('StabilityPool', async accounts => {
       // Liquidate defaulter 1
       await troveManager.liquidate(defaulter_1)
 
-      const bob_ANTUSD_Balance_Before = await lusdToken.balanceOf(bob)
+      const bob_ANTUSD_Balance_Before = await antusdToken.balanceOf(bob)
 
       const bob_Deposit_Before = await stabilityPool.getCompoundedANTUSDDeposit(bob)
 
@@ -2260,7 +2260,7 @@ contract('StabilityPool', async accounts => {
 
       // Check Bob's ANTUSD balance has risen by only the value of his compounded deposit
       const bob_expectedANTUSDBalance = (bob_ANTUSD_Balance_Before.add(bob_Deposit_Before)).toString()
-      const bob_ANTUSD_Balance_After = (await lusdToken.balanceOf(bob)).toString()
+      const bob_ANTUSD_Balance_After = (await antusdToken.balanceOf(bob)).toString()
       assert.equal(bob_ANTUSD_Balance_After, bob_expectedANTUSDBalance)
 
       // Check ANTUSD in Stability Pool has been reduced by only  Bob's compounded deposit
@@ -2300,9 +2300,9 @@ contract('StabilityPool', async accounts => {
       await troveManager.liquidate(defaulter_1)
       assert.isFalse(await sortedTroves.contains(defaulter_1))
 
-      const alice_ANTUSD_Balance_Before = await lusdToken.balanceOf(alice)
-      const bob_ANTUSD_Balance_Before = await lusdToken.balanceOf(bob)
-      const carol_ANTUSD_Balance_Before = await lusdToken.balanceOf(carol)
+      const alice_ANTUSD_Balance_Before = await antusdToken.balanceOf(alice)
+      const bob_ANTUSD_Balance_Before = await antusdToken.balanceOf(bob)
+      const carol_ANTUSD_Balance_Before = await antusdToken.balanceOf(carol)
 
       const alice_ETH_Balance_Before = web3.utils.toBN(await contracts.stETH.balanceOf(alice))
       const bob_ETH_Balance_Before = web3.utils.toBN(await contracts.stETH.balanceOf(bob))
@@ -2334,10 +2334,10 @@ contract('StabilityPool', async accounts => {
       const bob_expectedANTUSDBalance = (bob_ANTUSD_Balance_Before.add(bob_Deposit_Before)).toString()
       const carol_expectedANTUSDBalance = (carol_ANTUSD_Balance_Before.add(carol_Deposit_Before)).toString()
 
-      const alice_ANTUSD_Balance_After = (await lusdToken.balanceOf(alice)).toString()
+      const alice_ANTUSD_Balance_After = (await antusdToken.balanceOf(alice)).toString()
  
-      const bob_ANTUSD_Balance_After = (await lusdToken.balanceOf(bob)).toString()
-      const carol_ANTUSD_Balance_After = (await lusdToken.balanceOf(carol)).toString()
+      const bob_ANTUSD_Balance_After = (await antusdToken.balanceOf(bob)).toString()
+      const carol_ANTUSD_Balance_After = (await antusdToken.balanceOf(carol)).toString()
 
 
 
@@ -2441,8 +2441,8 @@ contract('StabilityPool', async accounts => {
       assert.equal(bob_ETHGain_1, bob_ETHGain_3)
     })
 
-    // --- LQTY functionality ---
-    it("withdrawFromSP(): triggers LQTY reward event - increases the sum G", async () => {
+    // --- ANTM functionality ---
+    it("withdrawFromSP(): triggers ANTM reward event - increases the sum G", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(1, 24)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves
@@ -2463,7 +2463,7 @@ contract('StabilityPool', async accounts => {
 
       const G_1 = await stabilityPool.epochToScaleToG(0, 0)
 
-      // Expect G has increased from the LQTY reward event triggered
+      // Expect G has increased from the ANTM reward event triggered
       assert.isTrue(G_1.gt(G_Before))
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
@@ -2473,7 +2473,7 @@ contract('StabilityPool', async accounts => {
 
       const G_2 = await stabilityPool.epochToScaleToG(0, 0)
 
-      // Expect G has increased from the LQTY reward event triggered
+      // Expect G has increased from the ANTM reward event triggered
       assert.isTrue(G_2.gt(G_1))
     })
 
@@ -2481,8 +2481,8 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // whale transfer to troves D and E
-      await lusdToken.transfer(D, dec(100, 18), { from: whale })
-      await lusdToken.transfer(E, dec(200, 18), { from: whale })
+      await antusdToken.transfer(D, dec(100, 18), { from: whale })
+      await antusdToken.transfer(E, dec(200, 18), { from: whale })
 
       // A, B, C open troves
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
@@ -2519,7 +2519,7 @@ contract('StabilityPool', async accounts => {
       assert.equal(frontEndTag_E, ZERO_ADDRESS)
     })
 
-    it("withdrawFromSP(), partial withdrawal: depositor receives LQTY rewards", async () => {
+    it("withdrawFromSP(), partial withdrawal: depositor receives ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves
@@ -2534,28 +2534,28 @@ contract('StabilityPool', async accounts => {
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // Get A, B, C LQTY balance before
-      const A_LQTYBalance_Before = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_Before = await lqtyToken.balanceOf(B)
-      const C_LQTYBalance_Before = await lqtyToken.balanceOf(C)
+      // Get A, B, C ANTM balance before
+      const A_ANTMBalance_Before = await antmToken.balanceOf(A)
+      const B_ANTMBalance_Before = await antmToken.balanceOf(B)
+      const C_ANTMBalance_Before = await antmToken.balanceOf(C)
 
       // A, B, C withdraw
       await stabilityPool.withdrawFromSP(dec(1, 18), { from: A })
       await stabilityPool.withdrawFromSP(dec(2, 18), { from: B })
       await stabilityPool.withdrawFromSP(dec(3, 18), { from: C })
 
-      // Get LQTY balance after
-      const A_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_After = await lqtyToken.balanceOf(B)
-      const C_LQTYBalance_After = await lqtyToken.balanceOf(C)
+      // Get ANTM balance after
+      const A_ANTMBalance_After = await antmToken.balanceOf(A)
+      const B_ANTMBalance_After = await antmToken.balanceOf(B)
+      const C_ANTMBalance_After = await antmToken.balanceOf(C)
 
-      // Check LQTY Balance of A, B, C has increased
-      assert.isTrue(A_LQTYBalance_After.gt(A_LQTYBalance_Before))
-      assert.isTrue(B_LQTYBalance_After.gt(B_LQTYBalance_Before))
-      assert.isTrue(C_LQTYBalance_After.gt(C_LQTYBalance_Before))
+      // Check ANTM Balance of A, B, C has increased
+      assert.isTrue(A_ANTMBalance_After.gt(A_ANTMBalance_Before))
+      assert.isTrue(B_ANTMBalance_After.gt(B_ANTMBalance_Before))
+      assert.isTrue(C_ANTMBalance_After.gt(C_ANTMBalance_Before))
     })
 
-    it("withdrawFromSP(), partial withdrawal: tagged front end receives LQTY rewards", async () => {
+    it("withdrawFromSP(), partial withdrawal: tagged front end receives ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves
@@ -2570,25 +2570,25 @@ contract('StabilityPool', async accounts => {
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // Get front ends' LQTY balance before
-      const F1_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_1)
-      const F2_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_2)
-      const F3_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_3)
+      // Get front ends' ANTM balance before
+      const F1_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_1)
+      const F2_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_2)
+      const F3_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_3)
 
       // A, B, C withdraw
       await stabilityPool.withdrawFromSP(dec(1, 18), { from: A })
       await stabilityPool.withdrawFromSP(dec(2, 18), { from: B })
       await stabilityPool.withdrawFromSP(dec(3, 18), { from: C })
 
-      // Get front ends' LQTY balance after
-      const F1_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const F2_LQTYBalance_After = await lqtyToken.balanceOf(B)
-      const F3_LQTYBalance_After = await lqtyToken.balanceOf(C)
+      // Get front ends' ANTM balance after
+      const F1_ANTMBalance_After = await antmToken.balanceOf(A)
+      const F2_ANTMBalance_After = await antmToken.balanceOf(B)
+      const F3_ANTMBalance_After = await antmToken.balanceOf(C)
 
-      // Check LQTY Balance of front ends has increased
-      assert.isTrue(F1_LQTYBalance_After.gt(F1_LQTYBalance_Before))
-      assert.isTrue(F2_LQTYBalance_After.gt(F2_LQTYBalance_Before))
-      assert.isTrue(F3_LQTYBalance_After.gt(F3_LQTYBalance_Before))
+      // Check ANTM Balance of front ends has increased
+      assert.isTrue(F1_ANTMBalance_After.gt(F1_ANTMBalance_Before))
+      assert.isTrue(F2_ANTMBalance_After.gt(F2_ANTMBalance_Before))
+      assert.isTrue(F3_ANTMBalance_After.gt(F3_ANTMBalance_Before))
     })
 
     it("withdrawFromSP(), partial withdrawal: tagged front end's stake decreases", async () => {
@@ -2697,7 +2697,7 @@ contract('StabilityPool', async accounts => {
       await priceFeed.setPrice(dec(200, 18))
 
       // A, B, C top withdraw part of their deposits. Grab G at each stage, as it can increase a bit
-      // between topups, because some block.timestamp time passes (and LQTY is issued) between ops
+      // between topups, because some block.timestamp time passes (and ANTM is issued) between ops
       const G1 = await stabilityPool.epochToScaleToG(currentScale, currentEpoch)
       await stabilityPool.withdrawFromSP(dec(1, 18), { from: A })
 
@@ -2730,8 +2730,8 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(100000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // Whale transfers to A, B 
-      await lusdToken.transfer(A, dec(10000, 18), { from: whale })
-      await lusdToken.transfer(B, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(A, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(B, dec(20000, 18), { from: whale })
 
       //C, D open troves
       await openTrove({ extraANTUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
@@ -2783,7 +2783,7 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: E } })
       await stabilityPool.provideToSP(dec(10000, 18), frontEnd_3, { from: E })
 
-      // Fast-forward time and make a second deposit, to trigger LQTY reward and make G > 0
+      // Fast-forward time and make a second deposit, to trigger ANTM reward and make G > 0
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
       await stabilityPool.provideToSP(dec(10000, 18), frontEnd_3, { from: E })
 
@@ -2809,8 +2809,8 @@ contract('StabilityPool', async accounts => {
       // --- TEST ---
 
       // Whale transfers to A, B
-      await lusdToken.transfer(A, dec(10000, 18), { from: whale })
-      await lusdToken.transfer(B, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(A, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(B, dec(20000, 18), { from: whale })
 
       await priceFeed.setPrice(dec(200, 18))
 
@@ -2868,7 +2868,7 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: E } })
       await stabilityPool.provideToSP(dec(10000, 18), frontEnd_3, { from: E })
 
-      // Fast-forward time and make a second deposit, to trigger LQTY reward and make G > 0
+      // Fast-forward time and make a second deposit, to trigger ANTM reward and make G > 0
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
       await stabilityPool.provideToSP(dec(10000, 18), frontEnd_3, { from: E })
 
@@ -2942,9 +2942,9 @@ contract('StabilityPool', async accounts => {
 
       await openTrove({ ICR: toBN(dec(2, 18)), extraParams: { from: defaulter_1 } })
 
-      //  SETUP: Execute a series of operations to trigger LQTY and ETH rewards for depositor A
+      //  SETUP: Execute a series of operations to trigger ANTM and ETH rewards for depositor A
 
-      // Fast-forward time and make a second deposit, to trigger LQTY reward and make G > 0
+      // Fast-forward time and make a second deposit, to trigger ANTM reward and make G > 0
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
       await stabilityPool.provideToSP(dec(100, 18), frontEnd_1, { from: A })
 
@@ -3358,7 +3358,7 @@ contract('StabilityPool', async accounts => {
      await openTrove({ ICR: toBN(dec(2, 18)), extraParams: { from: defaulter_1 } })
 
       // A transfers ANTUSD to D
-      await lusdToken.transfer(dennis, dec(10000, 18), { from: alice })
+      await antusdToken.transfer(dennis, dec(10000, 18), { from: alice })
 
       // D deposits to Stability Pool
       await stabilityPool.provideToSP(dec(10000, 18), frontEnd_1, { from: dennis })
@@ -3376,7 +3376,7 @@ contract('StabilityPool', async accounts => {
       await th.assertRevert(stabilityPool.withdrawETHGainToTrove(dennis, dennis, { from: dennis }), "caller must have an active trove to withdraw ETHGain to")
     })
 
-    it("withdrawETHGainToTrove(): triggers LQTY reward event - increases the sum G", async () => {
+    it("withdrawETHGainToTrove(): triggers ANTM reward event - increases the sum G", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves 
@@ -3406,7 +3406,7 @@ contract('StabilityPool', async accounts => {
 
       const G_1 = await stabilityPool.epochToScaleToG(0, 0)
 
-      // Expect G has increased from the LQTY reward event triggered
+      // Expect G has increased from the ANTM reward event triggered
       assert.isTrue(G_1.gt(G_Before))
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
@@ -3419,7 +3419,7 @@ contract('StabilityPool', async accounts => {
 
       const G_2 = await stabilityPool.epochToScaleToG(0, 0)
 
-      // Expect G has increased from the LQTY reward event triggered
+      // Expect G has increased from the ANTM reward event triggered
       assert.isTrue(G_2.gt(G_1))
     })
 
@@ -3467,7 +3467,7 @@ contract('StabilityPool', async accounts => {
       assert.equal(frontEndTag_C, ZERO_ADDRESS)
     })
 
-    it("withdrawETHGainToTrove(), eligible deposit: depositor receives LQTY rewards", async () => {
+    it("withdrawETHGainToTrove(), eligible deposit: depositor receives ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
        // A, B, C open troves 
@@ -3489,10 +3489,10 @@ contract('StabilityPool', async accounts => {
       await troveManager.liquidate(defaulter_1)
       assert.isFalse(await sortedTroves.contains(defaulter_1))
 
-      // Get A, B, C LQTY balance before
-      const A_LQTYBalance_Before = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_Before = await lqtyToken.balanceOf(B)
-      const C_LQTYBalance_Before = await lqtyToken.balanceOf(C)
+      // Get A, B, C ANTM balance before
+      const A_ANTMBalance_Before = await antmToken.balanceOf(A)
+      const B_ANTMBalance_Before = await antmToken.balanceOf(B)
+      const C_ANTMBalance_Before = await antmToken.balanceOf(C)
 
       // Check A, B, C have non-zero ETH gain
       assert.isTrue((await stabilityPool.getDepositorETHGain(A)).gt(ZERO))
@@ -3506,18 +3506,18 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.withdrawETHGainToTrove(B, B, { from: B })
       await stabilityPool.withdrawETHGainToTrove(C, C, { from: C })
 
-      // Get LQTY balance after
-      const A_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_After = await lqtyToken.balanceOf(B)
-      const C_LQTYBalance_After = await lqtyToken.balanceOf(C)
+      // Get ANTM balance after
+      const A_ANTMBalance_After = await antmToken.balanceOf(A)
+      const B_ANTMBalance_After = await antmToken.balanceOf(B)
+      const C_ANTMBalance_After = await antmToken.balanceOf(C)
 
-      // Check LQTY Balance of A, B, C has increased
-      assert.isTrue(A_LQTYBalance_After.gt(A_LQTYBalance_Before))
-      assert.isTrue(B_LQTYBalance_After.gt(B_LQTYBalance_Before))
-      assert.isTrue(C_LQTYBalance_After.gt(C_LQTYBalance_Before))
+      // Check ANTM Balance of A, B, C has increased
+      assert.isTrue(A_ANTMBalance_After.gt(A_ANTMBalance_Before))
+      assert.isTrue(B_ANTMBalance_After.gt(B_ANTMBalance_Before))
+      assert.isTrue(C_ANTMBalance_After.gt(C_ANTMBalance_Before))
     })
 
-    it("withdrawETHGainToTrove(), eligible deposit: tagged front end receives LQTY rewards", async () => {
+    it("withdrawETHGainToTrove(), eligible deposit: tagged front end receives ANTM rewards", async () => {
       await openTrove({ extraANTUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
      // A, B, C open troves 
@@ -3539,10 +3539,10 @@ contract('StabilityPool', async accounts => {
       await troveManager.liquidate(defaulter_1)
       assert.isFalse(await sortedTroves.contains(defaulter_1))
 
-      // Get front ends' LQTY balance before
-      const F1_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_1)
-      const F2_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_2)
-      const F3_LQTYBalance_Before = await lqtyToken.balanceOf(frontEnd_3)
+      // Get front ends' ANTM balance before
+      const F1_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_1)
+      const F2_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_2)
+      const F3_ANTMBalance_Before = await antmToken.balanceOf(frontEnd_3)
 
       await priceFeed.setPrice(dec(200, 18))
 
@@ -3556,15 +3556,15 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.withdrawETHGainToTrove(B, B, { from: B })
       await stabilityPool.withdrawETHGainToTrove(C, C, { from: C })
 
-      // Get front ends' LQTY balance after
-      const F1_LQTYBalance_After = await lqtyToken.balanceOf(frontEnd_1)
-      const F2_LQTYBalance_After = await lqtyToken.balanceOf(frontEnd_2)
-      const F3_LQTYBalance_After = await lqtyToken.balanceOf(frontEnd_3)
+      // Get front ends' ANTM balance after
+      const F1_ANTMBalance_After = await antmToken.balanceOf(frontEnd_1)
+      const F2_ANTMBalance_After = await antmToken.balanceOf(frontEnd_2)
+      const F3_ANTMBalance_After = await antmToken.balanceOf(frontEnd_3)
 
-      // Check LQTY Balance of front ends has increased
-      assert.isTrue(F1_LQTYBalance_After.gt(F1_LQTYBalance_Before))
-      assert.isTrue(F2_LQTYBalance_After.gt(F2_LQTYBalance_Before))
-      assert.isTrue(F3_LQTYBalance_After.gt(F3_LQTYBalance_Before))
+      // Check ANTM Balance of front ends has increased
+      assert.isTrue(F1_ANTMBalance_After.gt(F1_ANTMBalance_Before))
+      assert.isTrue(F2_ANTMBalance_After.gt(F2_ANTMBalance_Before))
+      assert.isTrue(F3_ANTMBalance_After.gt(F3_ANTMBalance_Before))
     })
 
     it("withdrawETHGainToTrove(), eligible deposit: tagged front end's stake decreases", async () => {
@@ -3692,7 +3692,7 @@ contract('StabilityPool', async accounts => {
       await priceFeed.setPrice(dec(200, 18))
 
       // A, B, C withdraw ETH gain to troves. Grab G at each stage, as it can increase a bit
-      // between topups, because some block.timestamp time passes (and LQTY is issued) between ops
+      // between topups, because some block.timestamp time passes (and ANTM is issued) between ops
       const G1 = await stabilityPool.epochToScaleToG(currentScale, currentEpoch)
       await stabilityPool.withdrawETHGainToTrove(A, A, { from: A })
 
@@ -3725,8 +3725,8 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraANTUSDAmount: toBN(dec(100000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // Whale transfers ANTUSD to A, B
-      await lusdToken.transfer(A, dec(10000, 18), { from: whale })
-      await lusdToken.transfer(B, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(A, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(B, dec(20000, 18), { from: whale })
 
       // C, D open troves 
       await openTrove({ extraANTUSDAmount: toBN(dec(3000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
@@ -3738,7 +3738,7 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(30, 18), frontEnd_2, { from: C })
       await stabilityPool.provideToSP(dec(40, 18), ZERO_ADDRESS, { from: D })
 
-      // fastforward time, and E makes a deposit, creating LQTY rewards for all
+      // fastforward time, and E makes a deposit, creating ANTM rewards for all
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
       await openTrove({ extraANTUSDAmount: toBN(dec(3000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: E } })
       await stabilityPool.provideToSP(dec(3000, 18), ZERO_ADDRESS, { from: E })

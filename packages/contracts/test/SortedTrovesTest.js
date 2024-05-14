@@ -49,7 +49,7 @@ contract('SortedTroves', async accounts => {
   let sortedTroves
   let troveManager
   let borrowerOperations
-  let lusdToken
+  let antusdToken
 
   const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
 
@@ -62,12 +62,12 @@ contract('SortedTroves', async accounts => {
     beforeEach(async () => {
       contracts = await deploymentHelper.deployLiquityCore()
       contracts.troveManager = await TroveManagerTester.new()
-      contracts.lusdToken = await ANTUSDToken.new(
+      contracts.antusdToken = await ANTUSDToken.new(
         contracts.troveManager.address,
         contracts.stabilityPool.address,
         contracts.borrowerOperations.address
       )
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+      const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
       await allocator.allocate(contracts, accounts.slice(0, 30))
 
@@ -75,11 +75,11 @@ contract('SortedTroves', async accounts => {
       sortedTroves = contracts.sortedTroves
       troveManager = contracts.troveManager
       borrowerOperations = contracts.borrowerOperations
-      lusdToken = contracts.lusdToken
+      antusdToken = contracts.antusdToken
 
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
-      await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-      await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+      await deploymentHelper.connectANTMContracts(ANTMContracts)
+      await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+      await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
     })
 
     it('contains(): returns true for addresses that have opened troves', async () => {
@@ -120,9 +120,9 @@ contract('SortedTroves', async accounts => {
       await openTrove({ ICR: toBN(dec(2000, 18)), extraParams: { from: carol } })
 
       // to compensate borrowing fees
-      await lusdToken.transfer(alice, dec(1000, 18), { from: whale })
-      await lusdToken.transfer(bob, dec(1000, 18), { from: whale })
-      await lusdToken.transfer(carol, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(1000, 18), { from: whale })
 
       // A, B, C close troves
       await borrowerOperations.closeTrove({ from: alice })
@@ -149,9 +149,9 @@ contract('SortedTroves', async accounts => {
       await openTrove({ ICR: toBN(dec(2000, 18)), extraParams: { from: carol } })
 
       // to compensate borrowing fees
-      await lusdToken.transfer(alice, dec(1000, 18), { from: whale })
-      await lusdToken.transfer(bob, dec(1000, 18), { from: whale })
-      await lusdToken.transfer(carol, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(1000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(1000, 18), { from: whale })
 
       // A, B, C close troves
       await borrowerOperations.closeTrove({ from: alice })

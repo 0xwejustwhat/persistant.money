@@ -28,12 +28,12 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.lusdToken = await ANTUSDToken.new(
+    contracts.antusdToken = await ANTUSDToken.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
     await allocator.allocate(contracts, accounts.slice(0, 35))
 
@@ -42,9 +42,9 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
     priceFeed = contracts.priceFeedTestnet
     sortedTroves = contracts.sortedTroves
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+    await deploymentHelper.connectANTMContracts(ANTMContracts)
+    await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+    await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
   })
 
   context('Batch liquidations', () => {

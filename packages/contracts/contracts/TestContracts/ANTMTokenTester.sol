@@ -2,23 +2,23 @@
 
 pragma solidity 0.6.11;
 
-import "../LQTY/LQTYToken.sol";
+import "../ANTM/ANTMToken.sol";
 
-contract LQTYTokenTester is LQTYToken {
+contract ANTMTokenTester is ANTMToken {
     constructor
     (
         address _communityIssuanceAddress, 
-        address _lqtyStakingAddress,
+        address _antmStakingAddress,
         address _lockupFactoryAddress,
         address _bountyAddress,
         address _lpRewardsAddress,
         address _multisigAddress
     ) 
         public 
-        LQTYToken 
+        ANTMToken 
     (
         _communityIssuanceAddress,
-        _lqtyStakingAddress,
+        _antmStakingAddress,
         _lockupFactoryAddress,
         _bountyAddress,
         _lpRewardsAddress,
@@ -32,11 +32,11 @@ contract LQTYTokenTester is LQTYToken {
         _mint(account, amount);
     }
 
-    function unprotectedSendToLQTYStaking(address _sender, uint256 _amount) external {
+    function unprotectedSendToANTMStaking(address _sender, uint256 _amount) external {
         // No check for the caller here
         
         if (_isFirstYear()) {_requireSenderIsNotMultisig(_sender);}
-        _transfer(_sender, lqtyStakingAddress, _amount);
+        _transfer(_sender, antmStakingAddress, _amount);
     }
 
     function callInternalApprove(address owner, address spender, uint256 amount) external returns (bool) {

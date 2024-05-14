@@ -28,7 +28,7 @@ contract('TroveManager', async accounts => {
   const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
 
   let priceFeed
-  let lusdToken
+  let antusdToken
   let sortedTroves
   let troveManager
   let activePool
@@ -53,17 +53,17 @@ contract('TroveManager', async accounts => {
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.lusdToken = await ANTUSDTokenTester.new(
+    contracts.antusdToken = await ANTUSDTokenTester.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
     await allocator.allocate(contracts, accounts.slice(0, 30))
 
     priceFeed = contracts.priceFeedTestnet
-    lusdToken = contracts.lusdToken
+    antusdToken = contracts.antusdToken
     sortedTroves = contracts.sortedTroves
     troveManager = contracts.troveManager
     activePool = contracts.activePool
@@ -73,14 +73,14 @@ contract('TroveManager', async accounts => {
     borrowerOperations = contracts.borrowerOperations
     hintHelpers = contracts.hintHelpers
 
-    lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
-    communityIssuance = LQTYContracts.communityIssuance
-    lockupContractFactory = LQTYContracts.lockupContractFactory
+    antmStaking = ANTMContracts.antmStaking
+    antmToken = ANTMContracts.antmToken
+    communityIssuance = ANTMContracts.communityIssuance
+    lockupContractFactory = ANTMContracts.lockupContractFactory
 
-    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+    await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+    await deploymentHelper.connectANTMContracts(ANTMContracts)
+    await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
   })
 
   it("A given trove's stake decline is negligible with adjustments and tiny liquidations", async () => {

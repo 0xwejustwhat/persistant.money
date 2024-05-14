@@ -9,14 +9,14 @@ import "../Interfaces/IBorrowerOperations.sol";
 import "../Interfaces/ITroveManager.sol";
 import "../Interfaces/IStabilityPool.sol";
 import "../Interfaces/IPriceFeed.sol";
-import "../Interfaces/ILQTYStaking.sol";
+import "../Interfaces/IANTMStaking.sol";
 import "./BorrowerOperationsScript.sol";
 import "./ETHTransferScript.sol";
-import "./LQTYStakingScript.sol";
+import "./ANTMStakingScript.sol";
 import "../Dependencies/console.sol";
 
 
-contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, LQTYStakingScript {
+contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, ANTMStakingScript {
     using SafeMath for uint;
 
     string constant public NAME = "BorrowerWrappersScript";
@@ -25,18 +25,18 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
     IStabilityPool immutable stabilityPool;
     IPriceFeed immutable priceFeed;
     IERC20 immutable antusdToken;
-    IERC20 immutable lqtyToken;
-    ILQTYStaking immutable lqtyStaking;
+    IERC20 immutable antmToken;
+    IANTMStaking immutable antmStaking;
 
     constructor(
         address _borrowerOperationsAddress,
         address _stETHAddress,
         address _troveManagerAddress,
-        address _lqtyStakingAddress
+        address _antmStakingAddress
     )
         BorrowerOperationsScript(IBorrowerOperations(_borrowerOperationsAddress), _stETHAddress)
         ETHTransferScript(_stETHAddress)
-        LQTYStakingScript(_lqtyStakingAddress)
+        ANTMStakingScript(_antmStakingAddress)
         public
     {
         checkContract(_troveManagerAddress);
@@ -55,13 +55,13 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         checkContract(antusdTokenCached);
         antusdToken = IERC20(antusdTokenCached);
 
-        address lqtyTokenCached = address(troveManagerCached.lqtyToken());
-        checkContract(lqtyTokenCached);
-        lqtyToken = IERC20(lqtyTokenCached);
+        address antmTokenCached = address(troveManagerCached.antmToken());
+        checkContract(antmTokenCached);
+        antmToken = IERC20(antmTokenCached);
 
-        ILQTYStaking lqtyStakingCached = troveManagerCached.lqtyStaking();
-        require(_lqtyStakingAddress == address(lqtyStakingCached), "BorrowerWrappersScript: Wrong LQTYStaking address");
-        lqtyStaking = lqtyStakingCached;
+        IANTMStaking antmStakingCached = troveManagerCached.antmStaking();
+        require(_antmStakingAddress == address(antmStakingCached), "BorrowerWrappersScript: Wrong ANTMStaking address");
+        antmStaking = antmStakingCached;
     }
 
     function claimCollateralAndOpenTrove(uint _maxFee, uint _ANTUSDAmount, address _upperHint, address _lowerHint, uint amount) external {
@@ -89,13 +89,13 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
 
     function claimSPRewardsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
         uint collBalanceBefore = IERC20(stETHAddress).balanceOf(address(this));
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
+        uint antmBalanceBefore = antmToken.balanceOf(address(this));
 
         // Claim rewards
         stabilityPool.withdrawFromSP(0);
 
         uint collBalanceAfter = IERC20(stETHAddress).balanceOf(address(this));
-        uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
+        uint antmBalanceAfter = antmToken.balanceOf(address(this));
         uint claimedCollateral = collBalanceAfter.sub(collBalanceBefore);
 
         // Add claimed ETH to trove, get more ANTUSD and stake it into the Stability Pool
@@ -109,20 +109,20 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
             }
         }
 
-        // Stake claimed LQTY
-        uint claimedLQTY = lqtyBalanceAfter.sub(lqtyBalanceBefore);
-        if (claimedLQTY > 0) {
-            lqtyStaking.stake(claimedLQTY);
+        // Stake claimed ANTM
+        uint claimedANTM = antmBalanceAfter.sub(antmBalanceBefore);
+        if (claimedANTM > 0) {
+            antmStaking.stake(claimedANTM);
         }
     }
 
     function claimStakingGainsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
         uint collBalanceBefore = IERC20(stETHAddress).balanceOf(address(this));
         uint antusdBalanceBefore = antusdToken.balanceOf(address(this));
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
+        uint antmBalanceBefore = antmToken.balanceOf(address(this));
 
         // Claim gains
-        lqtyStaking.unstake(0);
+        antmStaking.unstake(0);
 
         uint gainedCollateral = IERC20(stETHAddress).balanceOf(address(this)).sub(collBalanceBefore); // stack too deep issues :'(
         uint gainedANTUSD = antusdToken.balanceOf(address(this)).sub(antusdBalanceBefore);
@@ -140,11 +140,11 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         if (totalANTUSD > 0) {
             stabilityPool.provideToSP(totalANTUSD, address(0));
 
-            // Providing to Stability Pool also triggers LQTY claim, so stake it if any
-            uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
-            uint claimedLQTY = lqtyBalanceAfter.sub(lqtyBalanceBefore);
-            if (claimedLQTY > 0) {
-                lqtyStaking.stake(claimedLQTY);
+            // Providing to Stability Pool also triggers ANTM claim, so stake it if any
+            uint antmBalanceAfter = antmToken.balanceOf(address(this));
+            uint claimedANTM = antmBalanceAfter.sub(antmBalanceBefore);
+            if (claimedANTM > 0) {
+                antmStaking.stake(claimedANTM);
             }
         }
 

@@ -23,7 +23,7 @@ contract('Gas compensation tests', async accounts => {
     const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
 
   let priceFeed
-  let lusdToken
+  let antusdToken
   let sortedTroves
   let troveManager
   let activePool
@@ -55,17 +55,17 @@ contract('Gas compensation tests', async accounts => {
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.lusdToken = await ANTUSDToken.new(
+    contracts.antusdToken = await ANTUSDToken.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
     await allocator.allocate(contracts, accounts.slice(0, 22))
 
     priceFeed = contracts.priceFeedTestnet
-    lusdToken = contracts.lusdToken
+    antusdToken = contracts.antusdToken
     sortedTroves = contracts.sortedTroves
     troveManager = contracts.troveManager
     activePool = contracts.activePool
@@ -73,9 +73,9 @@ contract('Gas compensation tests', async accounts => {
     defaultPool = contracts.defaultPool
     borrowerOperations = contracts.borrowerOperations
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts) 
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+    await deploymentHelper.connectANTMContracts(ANTMContracts)
+    await deploymentHelper.connectCoreContracts(contracts, ANTMContracts) 
+    await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
   })
 
   // --- Raw gas compensation calculations ---

@@ -39,7 +39,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
   let contracts
 
   let priceFeed
-  let lusdToken
+  let antusdToken
   let sortedTroves
   let troveManager
   let activePool
@@ -61,14 +61,14 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
     beforeEach(async () => {
       contracts = await deploymentHelper.deployLiquityCore()
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+      const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
       contracts.troveManager = await TroveManagerTester.new()
       contracts = await deploymentHelper.deployANTUSDToken(contracts)
 
       await allocator.allocate(contracts, accounts.slice(0, 30))
 
       priceFeed = contracts.priceFeedTestnet
-      lusdToken = contracts.lusdToken
+      antusdToken = contracts.antusdToken
       sortedTroves = contracts.sortedTroves
       troveManager = contracts.troveManager
       activePool = contracts.activePool
@@ -76,9 +76,9 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       defaultPool = contracts.defaultPool
       borrowerOperations = contracts.borrowerOperations
 
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
-      await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-      await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+      await deploymentHelper.connectANTMContracts(ANTMContracts)
+      await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+      await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
     })
 
     // --- Compounding tests ---
@@ -98,7 +98,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -142,7 +142,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -187,7 +187,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -236,7 +236,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -283,7 +283,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -331,11 +331,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: carol })
 
       // Whale transfers 10k, 20k, 30k ANTUSD to A, B and C respectively who then deposit it to the SP
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
-      await lusdToken.transfer(bob, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(20000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(20000, 18), ZERO_ADDRESS, { from: bob })
-      await lusdToken.transfer(carol, dec(30000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(30000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(30000, 18), ZERO_ADDRESS, { from: carol })
 
       // 2 Defaulters open trove with 200% ICR
@@ -378,11 +378,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: carol })
 
       // Whale transfers 10k, 20k, 30k ANTUSD to A, B and C respectively who then deposit it to the SP
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
-      await lusdToken.transfer(bob, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(20000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(20000, 18), ZERO_ADDRESS, { from: bob })
-      await lusdToken.transfer(carol, dec(30000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(30000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(30000, 18), ZERO_ADDRESS, { from: carol })
 
       // Defaulters open trove with 200% ICR
@@ -432,11 +432,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       Bob:  456000 ANTUSD
       Carol: 13100 ANTUSD */
       // Whale transfers ANTUSD to  A, B and C respectively who then deposit it to the SP
-      await lusdToken.transfer(alice, dec(2000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(2000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(2000, 18), ZERO_ADDRESS, { from: alice })
-      await lusdToken.transfer(bob, dec(456000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(456000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(456000, 18), ZERO_ADDRESS, { from: bob })
-      await lusdToken.transfer(carol, dec(13100, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(13100, 18), { from: whale })
       await stabilityPool.provideToSP(dec(13100, 18), ZERO_ADDRESS, { from: carol })
 
       /* Defaulters open troves
@@ -493,7 +493,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -510,7 +510,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await troveManager.liquidate(defaulter_2, { from: owner });
 
       // Whale transfers 10k to Dennis who then provides to SP
-      await lusdToken.transfer(dennis, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(dennis, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: dennis })
 
       // Third defaulter liquidated
@@ -554,7 +554,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -572,7 +572,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await troveManager.liquidate(defaulter_2, { from: owner });
 
       // Dennis opens a trove and provides to SP
-      await lusdToken.transfer(dennis, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(dennis, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: dennis })
 
       // Third and fourth defaulters liquidated
@@ -617,11 +617,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       Carol: 15000 ANTUSD
       */
       // Whale transfers ANTUSD to  A, B and C respectively who then deposit it to the SP
-      await lusdToken.transfer(alice, dec(60000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(60000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(60000, 18), ZERO_ADDRESS, { from: alice })
-      await lusdToken.transfer(bob, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(20000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(20000, 18), ZERO_ADDRESS, { from: bob })
-      await lusdToken.transfer(carol, dec(15000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(15000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(15000, 18), ZERO_ADDRESS, { from: carol })
 
       /* Defaulters open troves:
@@ -643,7 +643,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await troveManager.liquidate(defaulter_2, { from: owner });
 
       // Dennis provides 25000 ANTUSD
-      await lusdToken.transfer(dennis, dec(25000, 18), { from: whale })
+      await antusdToken.transfer(dennis, dec(25000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(25000, 18), ZERO_ADDRESS, { from: dennis })
 
       // Last two defaulters liquidated
@@ -689,7 +689,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and C who then deposit it to the SP
       const depositors = [alice, bob, carol, dennis]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -754,13 +754,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       Dennis: 40000 ANTUSD
       */
       // Whale transfers ANTUSD to  A, B,C and D respectively who then deposit it to the SP
-      await lusdToken.transfer(alice, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(20000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(20000, 18), ZERO_ADDRESS, { from: alice })
-      await lusdToken.transfer(bob, dec(25000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(25000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(25000, 18), ZERO_ADDRESS, { from: bob })
-      await lusdToken.transfer(carol, dec(12500, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(12500, 18), { from: whale })
       await stabilityPool.provideToSP(dec(12500, 18), ZERO_ADDRESS, { from: carol })
-      await lusdToken.transfer(dennis, dec(40000, 18), { from: whale })
+      await antusdToken.transfer(dennis, dec(40000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(40000, 18), ZERO_ADDRESS, { from: dennis })
 
       /* Defaulters open troves:
@@ -788,7 +788,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await priceFeed.setPrice(dec(100, 18))
 
       const dennis_ETHWithdrawn = th.getEventArgByName(txD, 'ETHGainWithdrawn', '_ETH').toString()
-      assert.isAtMost(th.getDifference((await lusdToken.balanceOf(dennis)).toString(), '27692307692307700000000'), 100000000000)
+      assert.isAtMost(th.getDifference((await antusdToken.balanceOf(dennis)).toString(), '27692307692307700000000'), 100000000000)
       // 300*0.995 * 40000/97500
       assert.isAtMost(th.getDifference(dennis_ETHWithdrawn, '122461538461538466100'), 100000000000)
 
@@ -828,7 +828,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B and D who then deposit it to the SP
       const depositors = [alice, bob, dennis]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -846,7 +846,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await troveManager.liquidate(defaulter_2, { from: owner });
 
       // Carol makes deposit
-      await lusdToken.transfer(carol, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: carol })
 
       await troveManager.liquidate(defaulter_3, { from: owner });
@@ -858,7 +858,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await priceFeed.setPrice(dec(100, 18))
 
       const dennis_ETHWithdrawn = th.getEventArgByName(txD, 'ETHGainWithdrawn', '_ETH').toString()
-      assert.isAtMost(th.getDifference((await lusdToken.balanceOf(dennis)).toString(), '1666666666666666666666'), 100000)
+      assert.isAtMost(th.getDifference((await antusdToken.balanceOf(dennis)).toString(), '1666666666666666666666'), 100000)
       assert.isAtMost(th.getDifference(dennis_ETHWithdrawn, '82916666666666666667'), 100000)
 
       await troveManager.liquidate(defaulter_4, { from: owner });
@@ -903,7 +903,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B who then deposit it to the SP
       const depositors = [alice, bob]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -920,7 +920,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Carol, Dennis each deposit 10000 ANTUSD
       const depositors_2 = [carol, dennis]
       for (account of depositors_2) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -976,7 +976,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B who then deposit it to the SP
       const depositors = [alice, bob]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -1024,7 +1024,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Carol, Dennis each deposit 10000 ANTUSD
       const depositors_2 = [carol, dennis]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -1075,7 +1075,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Whale transfers 10k ANTUSD to A, B who then deposit it to the SP
       const depositors = [alice, bob]
       for (account of depositors) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -1090,13 +1090,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await troveManager.liquidate(defaulter_1, { from: owner });
 
       // Carol, Dennis, Erin each deposit 10000, 20000, 30000 ANTUSD respectively
-      await lusdToken.transfer(carol, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: carol })
 
-      await lusdToken.transfer(dennis, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(dennis, dec(20000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(20000, 18), ZERO_ADDRESS, { from: dennis })
 
-      await lusdToken.transfer(erin, dec(30000, 18), { from: whale })
+      await antusdToken.transfer(erin, dec(30000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(30000, 18), ZERO_ADDRESS, { from: erin })
 
       // Defaulter 2 liquidated. 10000 ANTUSD offset
@@ -1145,7 +1145,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: carol })
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: dennis })
 
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
 
       // Defaulter 1,2,3 withdraw 10000 ANTUSD
@@ -1209,7 +1209,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Alice, Bob each deposit 10k ANTUSD
       const depositors_1 = [alice, bob]
       for (account of depositors_1) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -1219,7 +1219,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Carol, Dennis each deposit 10000 ANTUSD
       const depositors_2 = [carol, dennis]
       for (account of depositors_2) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -1229,7 +1229,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Erin, Flyn each deposit 10000 ANTUSD
       const depositors_3 = [erin, flyn]
       for (account of depositors_3) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -1239,7 +1239,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Graham, Harriet each deposit 10000 ANTUSD
       const depositors_4 = [graham, harriet]
       for (account of depositors_4) {
-        await lusdToken.transfer(account, dec(10000, 18), { from: whale })
+        await antusdToken.transfer(account, dec(10000, 18), { from: whale })
         await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: account })
       }
 
@@ -1306,7 +1306,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: alice })
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: bob })
 
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
 
       // Defaulter 1 withdraws 'almost' 10000 ANTUSD:  9999.99991 ANTUSD
@@ -1332,7 +1332,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Grab the ETH gain from the emitted event in the tx log
       const alice_ETHWithdrawn = await th.getEventArgByName(txA, 'ETHGainWithdrawn', '_ETH').toString()
 
-      await lusdToken.transfer(bob, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: bob })
 
       // Defaulter 2 liquidated.  9900 ANTUSD liquidated. P altered by a factor of 1-(9900/10000) = 0.01.  Scale changed.
@@ -1366,7 +1366,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: carol })
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: dennis })
       
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
 
       // Defaulter 1 withdraws 'almost' 10k ANTUSD.
@@ -1390,13 +1390,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await priceFeed.setPrice(dec(100, 18))
 
       //B, C, D deposit to Stability Pool
-      await lusdToken.transfer(bob, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: bob })
 
-      await lusdToken.transfer(carol, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(20000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(20000, 18), ZERO_ADDRESS, { from: carol })
 
-      await lusdToken.transfer(dennis, dec(30000, 18), { from: whale })
+      await antusdToken.transfer(dennis, dec(30000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(30000, 18), ZERO_ADDRESS, { from: dennis })
 
       // 54000 ANTUSD liquidated.  P altered by a factor of 1-(59400/60000) = 0.01. Scale changed.
@@ -1449,7 +1449,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: bob })
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: carol })
       
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
 
       // Defaulter 1 and default 2 each withdraw 9999.999999999 ANTUSD
@@ -1472,7 +1472,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await priceFeed.setPrice(dec(100, 18))
 
       // Bob deposits 10k ANTUSD
-      await lusdToken.transfer(bob, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: bob })
 
       // Defaulter 2 liquidated
@@ -1506,7 +1506,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: carol })
       await borrowerOperations.openTrove(th._100pct, await getOpenTroveANTUSDAmount(dec(10000, 18)), ZERO_ADDRESS, ZERO_ADDRESS, dec(10000, 'ether'), { from: dennis })
       
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
 
       // Defaulter 1 and default 2 withdraw up to debt of 9999.9 ANTUSD and 59999.4 ANTUSD
@@ -1528,13 +1528,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await priceFeed.setPrice(dec(100, 18))
 
       // B, C, D deposit 10000, 20000, 30000 ANTUSD
-      await lusdToken.transfer(bob, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(bob, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: bob })
 
-      await lusdToken.transfer(carol, dec(20000, 18), { from: whale })
+      await antusdToken.transfer(carol, dec(20000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(20000, 18), ZERO_ADDRESS, { from: carol })
 
-      await lusdToken.transfer(dennis, dec(30000, 18), { from: whale })
+      await antusdToken.transfer(dennis, dec(30000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(30000, 18), ZERO_ADDRESS, { from: dennis })
 
       // Defaulter 2 liquidated
@@ -1580,7 +1580,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // Price drops by 50%
       await priceFeed.setPrice(dec(100, 18));
 
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
 
       // Defaulter 1 liquidated. P -> (~1e-10)*P
@@ -1622,7 +1622,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // price drops by 50%
       await priceFeed.setPrice(dec(100, 18));
 
-      await lusdToken.transfer(alice, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(alice, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: alice })
 
       // Defaulter 1 liquidated. 
@@ -1632,7 +1632,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       assert.equal(await stabilityPool.currentScale(), '0')
 
       // B deposits 9999.9 ANTUSD
-      await lusdToken.transfer(bob, dec(99999, 17), { from: whale })
+      await antusdToken.transfer(bob, dec(99999, 17), { from: whale })
       await stabilityPool.provideToSP(dec(99999, 17), ZERO_ADDRESS, { from: bob })
 
       // Defaulter 2 liquidated
@@ -1642,7 +1642,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       assert.equal(await stabilityPool.currentScale(), '1')
 
       // C deposits 9999.9 ANTUSD
-      await lusdToken.transfer(carol, dec(99999, 17), { from: whale })
+      await antusdToken.transfer(carol, dec(99999, 17), { from: whale })
       await stabilityPool.provideToSP(dec(99999, 17), ZERO_ADDRESS, { from: carol })
 
       // Defaulter 3 liquidated
@@ -1652,7 +1652,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       assert.equal(await stabilityPool.currentScale(), '1')
 
       // D deposits 9999.9 ANTUSD
-      await lusdToken.transfer(dennis, dec(99999, 17), { from: whale })
+      await antusdToken.transfer(dennis, dec(99999, 17), { from: whale })
       await stabilityPool.provideToSP(dec(99999, 17), ZERO_ADDRESS, { from: dennis })
 
       // Defaulter 4 liquidated
@@ -1706,8 +1706,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await priceFeed.setPrice(dec(100, 18));
 
       // A, B provide 10k ANTUSD 
-      await lusdToken.transfer(A, dec(10000, 18), { from: whale })
-      await lusdToken.transfer(B, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(A, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(B, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: A })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: B })
 
@@ -1729,7 +1729,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       assert.equal(ANTUSDinSP_1, '0')
 
       // Check SP ANTUSD balance is zero
-      const SPANTUSDBalance_1 = await lusdToken.balanceOf(stabilityPool.address)
+      const SPANTUSDBalance_1 = await antusdToken.balanceOf(stabilityPool.address)
       // console.log(`SPANTUSDBalance_1: ${SPANTUSDBalance_1}`)
       assert.equal(SPANTUSDBalance_1, '0')
 
@@ -1746,8 +1746,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // ==========
 
       // C, D provide 10k ANTUSD 
-      await lusdToken.transfer(C, dec(10000, 18), { from: whale })
-      await lusdToken.transfer(D, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(C, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(D, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: C })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: D })
 
@@ -1769,7 +1769,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       assert.equal(ANTUSDinSP_2, '0')
 
       // Check SP ANTUSD balance is zero
-      const SPANTUSDBalance_2 = await lusdToken.balanceOf(stabilityPool.address)
+      const SPANTUSDBalance_2 = await antusdToken.balanceOf(stabilityPool.address)
       // console.log(`SPANTUSDBalance_2: ${SPANTUSDBalance_2}`)
       assert.equal(SPANTUSDBalance_2, '0')
 
@@ -1786,8 +1786,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // ============
 
       // E, F provide 10k ANTUSD 
-      await lusdToken.transfer(E, dec(10000, 18), { from: whale })
-      await lusdToken.transfer(F, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(E, dec(10000, 18), { from: whale })
+      await antusdToken.transfer(F, dec(10000, 18), { from: whale })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: E })
       await stabilityPool.provideToSP(dec(10000, 18), ZERO_ADDRESS, { from: F })
 
@@ -1808,7 +1808,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       assert.equal(ANTUSDinSP_3, '0')
 
       // Check SP ANTUSD balance is zero
-      const SPANTUSDBalance_3 = await lusdToken.balanceOf(stabilityPool.address)
+      const SPANTUSDBalance_3 = await antusdToken.balanceOf(stabilityPool.address)
       // console.log(`SPANTUSDBalance_3: ${SPANTUSDBalance_3}`)
       assert.equal(SPANTUSDBalance_3, '0')
 
@@ -1906,7 +1906,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       await th.assertRevert(txBPromise, 'StabilityPool: caller must have non-zero ETH Gain')
 
       const aliceANTUSDBalance = await stabilityPool.getCompoundedANTUSDDeposit(alice)
-      // const aliceANTUSDBalance = await lusdToken.balanceOf(alice)
+      // const aliceANTUSDBalance = await antusdToken.balanceOf(alice)
       const aliceExpectedANTUSDBalance = toBN('99999999999999997500000000000000000000')
       const aliceANTUSDBalDiff = aliceANTUSDBalance.sub(aliceExpectedANTUSDBalance).abs()
 

@@ -2,10 +2,10 @@
 
 pragma solidity 0.6.11;
 
-import "../LQTY/LQTYStaking.sol";
+import "../ANTM/ANTMStaking.sol";
 
 
-contract LQTYStakingTester is LQTYStaking {
+contract ANTMStakingTester is ANTMStaking {
     function requireCallerIsTroveManager() external view {
         _requireCallerIsTroveManager();
     }

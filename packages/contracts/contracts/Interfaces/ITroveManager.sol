@@ -5,8 +5,8 @@ pragma solidity 0.6.11;
 import "./ILiquityBase.sol";
 import "./IStabilityPool.sol";
 import "./IANTUSDToken.sol";
-import "./ILQTYToken.sol";
-import "./ILQTYStaking.sol";
+import "./IANTMToken.sol";
+import "./IANTMStaking.sol";
 
 
 // Common interface for the Trove Manager.
@@ -23,8 +23,8 @@ interface ITroveManager is ILiquityBase {
     event GasPoolAddressChanged(address _gasPoolAddress);
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event LQTYTokenAddressChanged(address _lqtyTokenAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
+    event ANTMTokenAddressChanged(address _antmTokenAddress);
+    event ANTMStakingAddressChanged(address _antmStakingAddress);
 
     event Liquidation(uint _liquidatedDebt, uint _liquidatedColl, uint _collGasCompensation, uint _ANTUSDGasCompensation);
     event Redemption(uint _attemptedANTUSDAmount, uint _actualANTUSDAmount, uint _ETHSent, uint _ETHFee);
@@ -50,14 +50,14 @@ interface ITroveManager is ILiquityBase {
         address _priceFeedAddress,
         address _antusdTokenAddress,
         address _sortedTrovesAddress,
-        address _lqtyTokenAddress,
-        address _lqtyStakingAddress
+        address _antmTokenAddress,
+        address _antmStakingAddress
     ) external;
 
     function stabilityPool() external view returns (IStabilityPool);
     function antusdToken() external view returns (IANTUSDToken);
-    function lqtyToken() external view returns (ILQTYToken);
-    function lqtyStaking() external view returns (ILQTYStaking);
+    function antmToken() external view returns (IANTMToken);
+    function antmStaking() external view returns (IANTMStaking);
 
     function getTroveOwnersCount() external view returns (uint);
 

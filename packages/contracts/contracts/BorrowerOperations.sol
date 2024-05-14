@@ -7,7 +7,7 @@ import "./Interfaces/ITroveManager.sol";
 import "./Interfaces/IANTUSDToken.sol";
 import "./Interfaces/ICollSurplusPool.sol";
 import "./Interfaces/ISortedTroves.sol";
-import "./Interfaces/ILQTYStaking.sol";
+import "./Interfaces/IANTMStaking.sol";
 import "./Dependencies/IERC20.sol";
 import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/Ownable.sol";
@@ -29,8 +29,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     ICollSurplusPool collSurplusPool;
 
-    ILQTYStaking public lqtyStaking;
-    address public lqtyStakingAddress;
+    IANTMStaking public antmStaking;
+    address public antmStakingAddress;
 
     IANTUSDToken public antusdToken;
 
@@ -90,7 +90,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     event PriceFeedAddressChanged(address  _newPriceFeedAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event ANTUSDTokenAddressChanged(address _antusdTokenAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
+    event ANTMStakingAddressChanged(address _antmStakingAddress);
 
     event TroveCreated(address indexed _borrower, uint arrayIndex);
     event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, BorrowerOperation operation);
@@ -108,7 +108,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         address _priceFeedAddress,
         address _sortedTrovesAddress,
         address _antusdTokenAddress,
-        address _lqtyStakingAddress,
+        address _antmStakingAddress,
         address _stETHAddress
     )
         external
@@ -127,7 +127,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         checkContract(_priceFeedAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_antusdTokenAddress);
-        checkContract(_lqtyStakingAddress);
+        checkContract(_antmStakingAddress);
         checkContract(_stETHAddress);
 
         troveManager = ITroveManager(_troveManagerAddress);
@@ -139,8 +139,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         priceFeed = IPriceFeed(_priceFeedAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         antusdToken = IANTUSDToken(_antusdTokenAddress);
-        lqtyStakingAddress = _lqtyStakingAddress;
-        lqtyStaking = ILQTYStaking(_lqtyStakingAddress);
+        antmStakingAddress = _antmStakingAddress;
+        antmStaking = IANTMStaking(_antmStakingAddress);
         stETHAddress = _stETHAddress;
 
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -152,7 +152,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit ANTUSDTokenAddressChanged(_antusdTokenAddress);
-        emit LQTYStakingAddressChanged(_lqtyStakingAddress);
+        emit ANTMStakingAddressChanged(_antmStakingAddress);
 
         _renounceOwnership();
     }
@@ -380,9 +380,9 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
         _requireUserAcceptsFee(ANTUSDFee, _ANTUSDAmount, _maxFeePercentage);
         
-        // Send fee to LQTY staking contract
-        lqtyStaking.increaseF_ANTUSD(ANTUSDFee);
-        _antusdToken.mint(lqtyStakingAddress, ANTUSDFee);
+        // Send fee to ANTM staking contract
+        antmStaking.increaseF_ANTUSD(ANTUSDFee);
+        _antusdToken.mint(antmStakingAddress, ANTUSDFee);
 
         return ANTUSDFee;
     }

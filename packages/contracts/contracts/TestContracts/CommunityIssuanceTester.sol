@@ -2,24 +2,24 @@
 
 pragma solidity 0.6.11;
 
-import "../LQTY/CommunityIssuance.sol";
+import "../ANTM/CommunityIssuance.sol"; 
 
 contract CommunityIssuanceTester is CommunityIssuance {
-    function obtainLQTY(uint _amount) external {
-        lqtyToken.transfer(msg.sender, _amount);
+    function obtainANTM(uint _amount) external {
+        antmToken.transfer(msg.sender, _amount);
     }
 
     function getCumulativeIssuanceFraction() external view returns (uint) {
        return _getCumulativeIssuanceFraction();
     }
 
-    function unprotectedIssueLQTY() external returns (uint) {
+    function unprotectedIssueANTM() external returns (uint) {
         // No checks on caller address
        
-        uint latestTotalLQTYIssued = LQTYSupplyCap.mul(_getCumulativeIssuanceFraction()).div(DECIMAL_PRECISION);
-        uint issuance = latestTotalLQTYIssued.sub(totalLQTYIssued);
+        uint latestTotalANTMIssued = ANTMSupplyCap.mul(_getCumulativeIssuanceFraction()).div(DECIMAL_PRECISION);
+        uint issuance = latestTotalANTMIssued.sub(totalANTMIssued);
       
-        totalLQTYIssued = latestTotalLQTYIssued;
+        totalANTMIssued = latestTotalANTMIssued;
         return issuance;
     }
 }

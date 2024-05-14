@@ -76,12 +76,12 @@ contract('HintHelpers', async accounts => {
   before(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.lusdToken = await ANTUSDToken.new(
+    contracts.antusdToken = await ANTUSDToken.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
     sortedTroves = contracts.sortedTroves
     troveManager = contracts.troveManager
@@ -89,9 +89,9 @@ contract('HintHelpers', async accounts => {
     hintHelpers = contracts.hintHelpers
     priceFeed = contracts.priceFeedTestnet
   
-    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+    await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+    await deploymentHelper.connectANTMContracts(ANTMContracts)
+    await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
 
     numAccounts = 10
 

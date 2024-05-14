@@ -32,12 +32,12 @@ contract('CollSurplusPool', async accounts => {
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.lusdToken = await ANTUSDToken.new(
+    contracts.antusdToken = await ANTUSDToken.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
     await allocator.allocate(contracts, accounts.slice(0, 7))
 
@@ -45,9 +45,9 @@ contract('CollSurplusPool', async accounts => {
     collSurplusPool = contracts.collSurplusPool
     borrowerOperations = contracts.borrowerOperations
 
-    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+    await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+    await deploymentHelper.connectANTMContracts(ANTMContracts)
+    await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
   })
 
   it("CollSurplusPool::getETH(): Returns the ETH balance of the CollSurplusPool after redemption", async () => {
@@ -86,9 +86,9 @@ contract('CollSurplusPool', async accounts => {
 
   //   // open trove from NonPayable proxy contract
   //   const B_coll = toBN(dec(60, 18))
-  //   const B_lusdAmount = toBN(dec(3000, 18))
-  //   const B_netDebt = await th.getAmountWithBorrowingFee(contracts, B_lusdAmount)
-  //   const openTroveData = th.getTransactionData('openTrove(uint256,uint256,address,address)', ['0xde0b6b3a7640000', web3.utils.toHex(B_lusdAmount), B, B])
+  //   const B_antusdAmount = toBN(dec(3000, 18))
+  //   const B_netDebt = await th.getAmountWithBorrowingFee(contracts, B_antusdAmount)
+  //   const openTroveData = th.getTransactionData('openTrove(uint256,uint256,address,address)', ['0xde0b6b3a7640000', web3.utils.toHex(B_antusdAmount), B, B])
   //   await nonPayable.forward(borrowerOperations.address, openTroveData, { value: B_coll })
   //   await openTrove({ extraANTUSDAmount: B_netDebt, extraParams: { from: A, value: dec(3000, 'ether') } })
 

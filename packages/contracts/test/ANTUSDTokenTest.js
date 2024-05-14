@@ -54,8 +54,8 @@ contract('ANTUSDToken', async accounts => {
   const alicePrivateKey = '0xeaa445c85f7b438dEd6e831d06a4eD0CEBDc2f8527f84Fcda6EBB5fCfAd4C0e9'
 
   let chainId
-  let lusdTokenOriginal
-  let lusdTokenTester
+  let antusdTokenOriginal
+  let antusdTokenTester
   let stabilityPool
   let troveManager
   let borrowerOperations
@@ -69,46 +69,46 @@ contract('ANTUSDToken', async accounts => {
       const contracts = await deploymentHelper.deployTesterContractsHardhat()
 
 
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+      const ANTMContracts = await deploymentHelper.deployANTMContracts(bountyAddress, lpRewardsAddress, multisig)
 
-      await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
-      await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
+      await deploymentHelper.connectCoreContracts(contracts, ANTMContracts)
+      await deploymentHelper.connectANTMContracts(ANTMContracts)
+      await deploymentHelper.connectANTMContractsToCore(ANTMContracts, contracts)
 
-      lusdTokenOriginal = contracts.lusdToken
+      antusdTokenOriginal = contracts.antusdToken
       if (withProxy) {
         const users = [ alice, bob, carol, dennis ]
-        await deploymentHelper.deployProxyScripts(contracts, LQTYContracts, owner, users)
+        await deploymentHelper.deployProxyScripts(contracts, ANTMContracts, owner, users)
       }
 
-      lusdTokenTester = contracts.lusdToken
+      antusdTokenTester = contracts.antusdToken
       // for some reason this doesn’t work with coverage network
       //chainId = await web3.eth.getChainId()
-      chainId = await lusdTokenOriginal.getChainId()
+      chainId = await antusdTokenOriginal.getChainId()
 
       stabilityPool = contracts.stabilityPool
       troveManager = contracts.stabilityPool
       borrowerOperations = contracts.borrowerOperations
 
-      tokenVersion = await lusdTokenOriginal.version()
-      tokenName = await lusdTokenOriginal.name()
+      tokenVersion = await antusdTokenOriginal.version()
+      tokenName = await antusdTokenOriginal.name()
 
       // mint some tokens
       if (withProxy) {
-        await lusdTokenOriginal.unprotectedMint(lusdTokenTester.getProxyAddressFromUser(alice), 150)
-        await lusdTokenOriginal.unprotectedMint(lusdTokenTester.getProxyAddressFromUser(bob), 100)
-        await lusdTokenOriginal.unprotectedMint(lusdTokenTester.getProxyAddressFromUser(carol), 50)
+        await antusdTokenOriginal.unprotectedMint(antusdTokenTester.getProxyAddressFromUser(alice), 150)
+        await antusdTokenOriginal.unprotectedMint(antusdTokenTester.getProxyAddressFromUser(bob), 100)
+        await antusdTokenOriginal.unprotectedMint(antusdTokenTester.getProxyAddressFromUser(carol), 50)
       } else {
-        await lusdTokenOriginal.unprotectedMint(alice, 150)
-        await lusdTokenOriginal.unprotectedMint(bob, 100)
-        await lusdTokenOriginal.unprotectedMint(carol, 50)
+        await antusdTokenOriginal.unprotectedMint(alice, 150)
+        await antusdTokenOriginal.unprotectedMint(bob, 100)
+        await antusdTokenOriginal.unprotectedMint(carol, 50)
       }
     })
 
     it('balanceOf(): gets the balance of the account', async () => {
-      const aliceBalance = (await lusdTokenTester.balanceOf(alice)).toNumber()
-      const bobBalance = (await lusdTokenTester.balanceOf(bob)).toNumber()
-      const carolBalance = (await lusdTokenTester.balanceOf(carol)).toNumber()
+      const aliceBalance = (await antusdTokenTester.balanceOf(alice)).toNumber()
+      const bobBalance = (await antusdTokenTester.balanceOf(bob)).toNumber()
+      const carolBalance = (await antusdTokenTester.balanceOf(carol)).toNumber()
 
       assert.equal(aliceBalance, 150)
       assert.equal(bobBalance, 100)
@@ -116,215 +116,215 @@ contract('ANTUSDToken', async accounts => {
     })
 
     it('totalSupply(): gets the total supply', async () => {
-      const total = (await lusdTokenTester.totalSupply()).toString()
+      const total = (await antusdTokenTester.totalSupply()).toString()
       assert.equal(total, '300') // 300
     })
 
     it("name(): returns the token's name", async () => {
-      const name = await lusdTokenTester.name()
+      const name = await antusdTokenTester.name()
       assert.equal(name, "ANTUSD Stablecoin")
     })
 
     it("symbol(): returns the token's symbol", async () => {
-      const symbol = await lusdTokenTester.symbol()
+      const symbol = await antusdTokenTester.symbol()
       assert.equal(symbol, "ANTUSD")
     })
 
     it("decimal(): returns the number of decimal digits used", async () => {
-      const decimals = await lusdTokenTester.decimals()
+      const decimals = await antusdTokenTester.decimals()
       assert.equal(decimals, "18")
     })
 
     it("allowance(): returns an account's spending allowance for another account's balance", async () => {
-      await lusdTokenTester.approve(alice, 100, {from: bob})
+      await antusdTokenTester.approve(alice, 100, {from: bob})
 
-      const allowance_A = await lusdTokenTester.allowance(bob, alice)
-      const allowance_D = await lusdTokenTester.allowance(bob, dennis)
+      const allowance_A = await antusdTokenTester.allowance(bob, alice)
+      const allowance_D = await antusdTokenTester.allowance(bob, dennis)
 
       assert.equal(allowance_A, 100)
       assert.equal(allowance_D, '0')
     })
 
     it("approve(): approves an account to spend the specified amount", async () => {
-      const allowance_A_before = await lusdTokenTester.allowance(bob, alice)
+      const allowance_A_before = await antusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_before, '0')
 
-      await lusdTokenTester.approve(alice, 100, {from: bob})
+      await antusdTokenTester.approve(alice, 100, {from: bob})
 
-      const allowance_A_after = await lusdTokenTester.allowance(bob, alice)
+      const allowance_A_after = await antusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_after, 100)
     })
 
     if (!withProxy) {
       it("approve(): reverts when spender param is address(0)", async () => {
-        const txPromise = lusdTokenTester.approve(ZERO_ADDRESS, 100, {from: bob})
+        const txPromise = antusdTokenTester.approve(ZERO_ADDRESS, 100, {from: bob})
         await assertAssert(txPromise)
       })
 
       it("approve(): reverts when owner param is address(0)", async () => {
-        const txPromise = lusdTokenTester.callInternalApprove(ZERO_ADDRESS, alice, dec(1000, 18), {from: bob})
+        const txPromise = antusdTokenTester.callInternalApprove(ZERO_ADDRESS, alice, dec(1000, 18), {from: bob})
         await assertAssert(txPromise)
       })
     }
 
     it("transferFrom(): successfully transfers from an account which is it approved to transfer from", async () => {
-      const allowance_A_0 = await lusdTokenTester.allowance(bob, alice)
+      const allowance_A_0 = await antusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_0, '0')
 
-      await lusdTokenTester.approve(alice, 50, {from: bob})
+      await antusdTokenTester.approve(alice, 50, {from: bob})
 
       // Check A's allowance of Bob's funds has increased
-      const allowance_A_1= await lusdTokenTester.allowance(bob, alice)
+      const allowance_A_1= await antusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_1, 50)
 
 
-      assert.equal(await lusdTokenTester.balanceOf(carol), 50)
+      assert.equal(await antusdTokenTester.balanceOf(carol), 50)
 
       // Alice transfers from bob to Carol, using up her allowance
-      await lusdTokenTester.transferFrom(bob, carol, 50, {from: alice})
-      assert.equal(await lusdTokenTester.balanceOf(carol), 100)
+      await antusdTokenTester.transferFrom(bob, carol, 50, {from: alice})
+      assert.equal(await antusdTokenTester.balanceOf(carol), 100)
 
        // Check A's allowance of Bob's funds has decreased
-      const allowance_A_2= await lusdTokenTester.allowance(bob, alice)
+      const allowance_A_2= await antusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_2, '0')
 
       // Check bob's balance has decreased
-      assert.equal(await lusdTokenTester.balanceOf(bob), 50)
+      assert.equal(await antusdTokenTester.balanceOf(bob), 50)
 
       // Alice tries to transfer more tokens from bob's account to carol than she's allowed
-      const txPromise = lusdTokenTester.transferFrom(bob, carol, 50, {from: alice})
+      const txPromise = antusdTokenTester.transferFrom(bob, carol, 50, {from: alice})
       await assertRevert(txPromise)
     })
 
     it("transfer(): increases the recipient's balance by the correct amount", async () => {
-      assert.equal(await lusdTokenTester.balanceOf(alice), 150)
+      assert.equal(await antusdTokenTester.balanceOf(alice), 150)
 
-      await lusdTokenTester.transfer(alice, 37, {from: bob})
+      await antusdTokenTester.transfer(alice, 37, {from: bob})
 
-      assert.equal(await lusdTokenTester.balanceOf(alice), 187)
+      assert.equal(await antusdTokenTester.balanceOf(alice), 187)
     })
 
     it("transfer(): reverts if amount exceeds sender's balance", async () => {
-      assert.equal(await lusdTokenTester.balanceOf(bob), 100)
+      assert.equal(await antusdTokenTester.balanceOf(bob), 100)
 
-      const txPromise = lusdTokenTester.transfer(alice, 101, {from: bob})
+      const txPromise = antusdTokenTester.transfer(alice, 101, {from: bob})
       await assertRevert(txPromise)
     })
 
     it('transfer(): transferring to a blacklisted address reverts', async () => {
-      await assertRevert(lusdTokenTester.transfer(lusdTokenTester.address, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(ZERO_ADDRESS, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(troveManager.address, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(stabilityPool.address, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(borrowerOperations.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(antusdTokenTester.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(ZERO_ADDRESS, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(troveManager.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(stabilityPool.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(borrowerOperations.address, 1, { from: alice }))
     })
 
     it("increaseAllowance(): increases an account's allowance by the correct amount", async () => {
-      const allowance_A_Before = await lusdTokenTester.allowance(bob, alice)
+      const allowance_A_Before = await antusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_Before, '0')
 
-      await lusdTokenTester.increaseAllowance(alice, 100, {from: bob} )
+      await antusdTokenTester.increaseAllowance(alice, 100, {from: bob} )
 
-      const allowance_A_After = await lusdTokenTester.allowance(bob, alice)
+      const allowance_A_After = await antusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_After, 100)
     })
 
     if (!withProxy) {
       it('mint(): issues correct amount of tokens to the given address', async () => {
-        const alice_balanceBefore = await lusdTokenTester.balanceOf(alice)
+        const alice_balanceBefore = await antusdTokenTester.balanceOf(alice)
         assert.equal(alice_balanceBefore, 150)
 
-        await lusdTokenTester.unprotectedMint(alice, 100)
+        await antusdTokenTester.unprotectedMint(alice, 100)
 
-        const alice_BalanceAfter = await lusdTokenTester.balanceOf(alice)
+        const alice_BalanceAfter = await antusdTokenTester.balanceOf(alice)
         assert.equal(alice_BalanceAfter, 250)
       })
 
       it('burn(): burns correct amount of tokens from the given address', async () => {
-        const alice_balanceBefore = await lusdTokenTester.balanceOf(alice)
+        const alice_balanceBefore = await antusdTokenTester.balanceOf(alice)
         assert.equal(alice_balanceBefore, 150)
 
-        await lusdTokenTester.unprotectedBurn(alice, 70)
+        await antusdTokenTester.unprotectedBurn(alice, 70)
 
-        const alice_BalanceAfter = await lusdTokenTester.balanceOf(alice)
+        const alice_BalanceAfter = await antusdTokenTester.balanceOf(alice)
         assert.equal(alice_BalanceAfter, 80)
       })
 
-      // TODO: Rewrite this test - it should check the actual lusdTokenTester's balance.
+      // TODO: Rewrite this test - it should check the actual antusdTokenTester's balance.
       it('sendToPool(): changes balances of Stability pool and user by the correct amounts', async () => {
-        const stabilityPool_BalanceBefore = await lusdTokenTester.balanceOf(stabilityPool.address)
-        const bob_BalanceBefore = await lusdTokenTester.balanceOf(bob)
+        const stabilityPool_BalanceBefore = await antusdTokenTester.balanceOf(stabilityPool.address)
+        const bob_BalanceBefore = await antusdTokenTester.balanceOf(bob)
         assert.equal(stabilityPool_BalanceBefore, 0)
         assert.equal(bob_BalanceBefore, 100)
 
-        await lusdTokenTester.unprotectedSendToPool(bob, stabilityPool.address, 75)
+        await antusdTokenTester.unprotectedSendToPool(bob, stabilityPool.address, 75)
 
-        const stabilityPool_BalanceAfter = await lusdTokenTester.balanceOf(stabilityPool.address)
-        const bob_BalanceAfter = await lusdTokenTester.balanceOf(bob)
+        const stabilityPool_BalanceAfter = await antusdTokenTester.balanceOf(stabilityPool.address)
+        const bob_BalanceAfter = await antusdTokenTester.balanceOf(bob)
         assert.equal(stabilityPool_BalanceAfter, 75)
         assert.equal(bob_BalanceAfter, 25)
       })
 
       it('returnFromPool(): changes balances of Stability pool and user by the correct amounts', async () => {
         /// --- SETUP --- give pool 100 ANTUSD
-        await lusdTokenTester.unprotectedMint(stabilityPool.address, 100)
+        await antusdTokenTester.unprotectedMint(stabilityPool.address, 100)
 
         /// --- TEST ---
-        const stabilityPool_BalanceBefore = await lusdTokenTester.balanceOf(stabilityPool.address)
-        const  bob_BalanceBefore = await lusdTokenTester.balanceOf(bob)
+        const stabilityPool_BalanceBefore = await antusdTokenTester.balanceOf(stabilityPool.address)
+        const  bob_BalanceBefore = await antusdTokenTester.balanceOf(bob)
         assert.equal(stabilityPool_BalanceBefore, 100)
         assert.equal(bob_BalanceBefore, 100)
 
-        await lusdTokenTester.unprotectedReturnFromPool(stabilityPool.address, bob, 75)
+        await antusdTokenTester.unprotectedReturnFromPool(stabilityPool.address, bob, 75)
 
-        const stabilityPool_BalanceAfter = await lusdTokenTester.balanceOf(stabilityPool.address)
-        const bob_BalanceAfter = await lusdTokenTester.balanceOf(bob)
+        const stabilityPool_BalanceAfter = await antusdTokenTester.balanceOf(stabilityPool.address)
+        const bob_BalanceAfter = await antusdTokenTester.balanceOf(bob)
         assert.equal(stabilityPool_BalanceAfter, 25)
         assert.equal(bob_BalanceAfter, 175)
       })
     }
 
     it('transfer(): transferring to a blacklisted address reverts', async () => {
-      await assertRevert(lusdTokenTester.transfer(lusdTokenTester.address, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(ZERO_ADDRESS, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(troveManager.address, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(stabilityPool.address, 1, { from: alice }))
-      await assertRevert(lusdTokenTester.transfer(borrowerOperations.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(antusdTokenTester.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(ZERO_ADDRESS, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(troveManager.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(stabilityPool.address, 1, { from: alice }))
+      await assertRevert(antusdTokenTester.transfer(borrowerOperations.address, 1, { from: alice }))
     })
 
     it('decreaseAllowance(): decreases allowance by the expected amount', async () => {
-      await lusdTokenTester.approve(bob, dec(3, 18), { from: alice })
-      assert.equal((await lusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
-      await lusdTokenTester.decreaseAllowance(bob, dec(1, 18), { from: alice })
-      assert.equal((await lusdTokenTester.allowance(alice, bob)).toString(), dec(2, 18))
+      await antusdTokenTester.approve(bob, dec(3, 18), { from: alice })
+      assert.equal((await antusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
+      await antusdTokenTester.decreaseAllowance(bob, dec(1, 18), { from: alice })
+      assert.equal((await antusdTokenTester.allowance(alice, bob)).toString(), dec(2, 18))
     })
 
     it('decreaseAllowance(): fails trying to decrease more than previously allowed', async () => {
-      await lusdTokenTester.approve(bob, dec(3, 18), { from: alice })
-      assert.equal((await lusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
-      await assertRevert(lusdTokenTester.decreaseAllowance(bob, dec(4, 18), { from: alice }), 'ERC20: decreased allowance below zero')
-      assert.equal((await lusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
+      await antusdTokenTester.approve(bob, dec(3, 18), { from: alice })
+      assert.equal((await antusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
+      await assertRevert(antusdTokenTester.decreaseAllowance(bob, dec(4, 18), { from: alice }), 'ERC20: decreased allowance below zero')
+      assert.equal((await antusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
     })
 
     // EIP2612 tests
 
     if (!withProxy) {
       it("version(): returns the token contract's version", async () => {
-        const version = await lusdTokenTester.version()
+        const version = await antusdTokenTester.version()
         assert.equal(version, "1")
       })
 
       it('Initializes PERMIT_TYPEHASH correctly', async () => {
-        assert.equal(await lusdTokenTester.permitTypeHash(), PERMIT_TYPEHASH)
+        assert.equal(await antusdTokenTester.permitTypeHash(), PERMIT_TYPEHASH)
       })
 
       it('Initializes DOMAIN_SEPARATOR correctly', async () => {
-        assert.equal(await lusdTokenTester.domainSeparator(),
-                     getDomainSeparator(tokenName, lusdTokenTester.address, chainId, tokenVersion))
+        assert.equal(await antusdTokenTester.domainSeparator(),
+                     getDomainSeparator(tokenName, antusdTokenTester.address, chainId, tokenVersion))
       })
 
       it('Initial nonce for a given address is 0', async function () {
-        assert.equal(toBN(await lusdTokenTester.nonces(alice)).toString(), '0');
+        assert.equal(toBN(await antusdTokenTester.nonces(alice)).toString(), '0');
       });
 
       // Create the approval tx data
@@ -335,11 +335,11 @@ contract('ANTUSDToken', async accounts => {
       }
 
       const buildPermitTx = async (deadline) => {
-        const nonce = (await lusdTokenTester.nonces(approve.owner)).toString()
+        const nonce = (await antusdTokenTester.nonces(approve.owner)).toString()
 
         // Get the EIP712 digest
         const digest = getPermitDigest(
-          tokenName, lusdTokenTester.address,
+          tokenName, antusdTokenTester.address,
           chainId, tokenVersion,
           approve.owner, approve.spender,
           approve.value, nonce, deadline
@@ -347,7 +347,7 @@ contract('ANTUSDToken', async accounts => {
 
         const { v, r, s } = sign(digest, alicePrivateKey)
 
-        const tx = lusdTokenTester.permit(
+        const tx = antusdTokenTester.permit(
           approve.owner, approve.spender, approve.value,
           deadline, v, hexlify(r), hexlify(s)
         )
@@ -365,16 +365,16 @@ contract('ANTUSDToken', async accounts => {
 
         // Check that approval was successful
         assert.equal(event.event, 'Approval')
-        assert.equal(await lusdTokenTester.nonces(approve.owner), 1)
-        assert.equal(await lusdTokenTester.allowance(approve.owner, approve.spender), approve.value)
+        assert.equal(await antusdTokenTester.nonces(approve.owner), 1)
+        assert.equal(await antusdTokenTester.allowance(approve.owner, approve.spender), approve.value)
 
         // Check that we can not use re-use the same signature, since the user's nonce has been incremented (replay protection)
-        await assertRevert(lusdTokenTester.permit(
+        await assertRevert(antusdTokenTester.permit(
           approve.owner, approve.spender, approve.value,
           deadline, v, r, s), 'ANTUSD: invalid signature')
 
         // Check that the zero address fails
-        await assertAssert(lusdTokenTester.permit('0x0000000000000000000000000000000000000000',
+        await assertAssert(antusdTokenTester.permit('0x0000000000000000000000000000000000000000',
                                                   approve.spender, approve.value, deadline, '0x99', r, s))
       })
 
@@ -390,7 +390,7 @@ contract('ANTUSDToken', async accounts => {
 
         const { v, r, s } = await buildPermitTx(deadline)
 
-        const tx = lusdTokenTester.permit(
+        const tx = antusdTokenTester.permit(
           carol, approve.spender, approve.value,
           deadline, v, hexlify(r), hexlify(s)
         )
